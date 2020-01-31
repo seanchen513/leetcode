@@ -36,6 +36,9 @@ The given tree will have between 1 and 1000 nodes.
 Each node of the tree will have a distinct value between 1 and 1000.
 """
 
+# Essentially the same problem as:
+# LC865: Smallest Subtree with All the Deepest Nodes.
+
 import sys
 sys.path.insert(1, '../tree/')
 
@@ -43,14 +46,14 @@ from binary_tree import TreeNode, print_tree, array_to_bt_lc
 
 ###############################################################################
 """
-Solution 1.
+Solution 1: Find paths from root to each of the deepest leaves.  The paths
+will agree up to their LCA.
 
 There may be 1, 2, or more deepest leaves.  They all occur at the same level.
+They are all the nodes at the last level of the tree.
 
-Idea: find paths from root to each of the deepest leaves.  The paths will agree
-up to their LCA.
-
-
+O() time
+O() extra space
 """
 class Solution:
     def lcaDeepestLeaves(self, root: TreeNode) -> TreeNode:
@@ -143,7 +146,45 @@ class Solution1b:
 
 ###############################################################################
 """
-Solution 2: Postorder recursion with subtree heights and LCA
+Solution 2: Build depth dict and find max depth.  Then recurse, returning node 
+if L and R, else L or R.  
+
+This generalizes a solution for the case of two given nodes.
+
+O(n) time
+O(n) extra space
+
+https://leetcode.com/problems/smallest-subtree-with-all-the-deepest-nodes/solution/
+"""
+class Solution2:
+    def lcaDeepestLeaves(self, root: TreeNode) -> TreeNode:
+        def dfs(node, parent=None):
+            if node:
+                depth[node] = depth[parent] + 1
+                dfs(node.left, node)
+                dfs(node.right, node)
+
+        depth = {None: -1}
+        dfs(root)
+
+        max_depth = max(depth.values())
+
+        def answer(node):
+            if not node or depth[node] == max_depth:
+                return node
+
+            L = answer(node.left)
+            R = answer(node.right)
+
+            return node if L and R else L or R
+
+        return answer(root)
+
+###############################################################################
+"""
+Solution 3: Postorder recursion with subtree heights and LCA.
+This combines the two recursions of solution 2.
+This solution depends on the deepest nodes being on the same (last) level.
 
 Base cases:
     node is None: height = 0, LCA is None
@@ -158,8 +199,10 @@ O(n) time since single pass
 O(h) extra space for recursion stack
 
 https://leetcode.com/problems/lowest-common-ancestor-of-deepest-leaves/discuss/334577/JavaC%2B%2BPython-Two-Recursive-Solution
+
+https://leetcode.com/problems/smallest-subtree-with-all-the-deepest-nodes/solution/
 """
-class Solution2:
+class Solution3:
     def lcaDeepestLeaves(self, root: TreeNode) -> TreeNode:
         def helper(root): # returns (subtree height, LCA)
             if not root:
@@ -179,7 +222,9 @@ class Solution2:
 
 ###############################################################################
 """
-Solution 3: Postorder recursion using subtree depths.
+Solution 4: Postorder recursion using subtree depths.
+
+This solution depends on the deepest nodes being on the same (last) level.
 
 The LCA node must have deepest leaves in both subtrees.  So the depths of
 its two subtrees must be equal, and also equal to the maximum depth in the
@@ -194,7 +239,7 @@ one found.
 
 https://leetcode.com/problems/lowest-common-ancestor-of-deepest-leaves/discuss/334577/JavaC%2B%2BPython-Two-Recursive-Solution
 """
-class Solution3:
+class Solution4:
     def lcaDeepestLeaves(self, root: TreeNode) -> TreeNode:
         def helper(node, depth):
             self.deepest = max(self.deepest, depth)
@@ -218,11 +263,58 @@ class Solution3:
         return self.lca
 
 ###############################################################################
+"""
+Solution 5: BFS to find all nodes at last level, while using dict
+to track parents.  Then iteratively take parents of all these nodes
+(going back one generation at a time) until they coincide at a single node.
+
+This solution depends on the deepest nodes being on the same (last) level.
+
+O(n) time - BFS is O(n)
+O(n) extra space - for parents dict
+"""
+class Solution5:
+    def lcaDeepestLeaves(self, root: TreeNode) -> TreeNode:
+        level = [root]
+        parents = {root: None}
+
+        while True:
+            next_level = []
+
+            for node in level:
+                if node.left:
+                    next_level.append(node.left)
+                    parents[node.left] = node
+                if node.right:
+                    next_level.append(node.right)
+                    parents[node.right] = node
+
+            if not next_level:
+                break
+            
+            level = next_level
+
+        # "level" now contains all the nodes at the deepest level
+        if len(level) == 1:
+            return level[0]
+        
+        ancestors = set(level) # convert to set; rename for readability
+
+        while len(ancestors) != 1:
+            ancestors = set(parents[node] for node in ancestors)
+
+        # pop() on a set returns arbitrary element and raises KeyError
+        # if no element is available.  This is not a problem since we
+        # are sure there is exactly one element in the set.
+        return ancestors.pop()
+
+###############################################################################
 
 if __name__ == "__main__":
     def test(arr):
         root = array_to_bt_lc(arr)
-        solutions = [Solution(), Solution1b(), Solution2(), Solution3()]
+        solutions = [Solution(), Solution1b(), Solution2(), Solution3(), 
+            Solution4(), Solution5()]
 
         lcas = [s.lcaDeepestLeaves(root) for s in solutions]
         lca_vals = [lca.val for lca in lcas]
