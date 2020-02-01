@@ -82,6 +82,10 @@ class Solution:
 ###############################################################################
 """
 Solution 2: preorder recursion using upper bounds.
+
+O(n) time
+O(h) extra space for recursion
+O(n) extra space for BST being built
 """
 class Solution2:
     def bstFromPreorder(self, preorder: List[int]) -> TreeNode:
