@@ -32,6 +32,9 @@ from typing import List
 ###############################################################################
 """
 Solution 1: Recursion.
+In this case:
+1. index runs from len(nums)-1 to 0 (or < 0)
+2. state vars are index "i" and current target sum "target"
 
 O(2^n) time
 
@@ -40,8 +43,10 @@ LC: TLE
 class Solution:
     def findTargetSumWays(self, nums: List[int], S: int) -> int:
         def num_ways(i, target):
-            if i == 0:
-                return (nums[0] == target) + (nums[0] == -target)
+            #if i == 0:
+            #    return (nums[0] == target) + (nums[0] == -target)
+            if i < 0:
+                return target == 0
 
             return num_ways(i-1, target - nums[i]) + num_ways(i-1, target + nums[i])
 
@@ -50,93 +55,117 @@ class Solution:
 ###############################################################################
 """
 Solution 1b: Recursion.
+In this case:
+1. index runs from 0 to len(nums)-1.
+2. state vars are index "i" and current sum "curr_sum".
 
 O(2^n) time
 """
 class Solution1b:
     def findTargetSumWays(self, nums: List[int], S: int) -> int:
-        def rec(i, sum_so_far):
+        def rec(i, curr_sum):
+            if i == len(nums):
+                return (curr_sum == S)
+            
+            pos = rec(i+1, curr_sum + nums[i])
+            neg = rec(i+1, curr_sum - nums[i])
+
+            return pos + neg
+
+        return rec(0, 0)
+
+"""
+Solution 1c: Another way to write solution 1b.  
+Use nonlocal count variable r ather than returning a count.
+"""
+class Solution1c:
+    def findTargetSumWays(self, nums: List[int], S: int) -> int:
+        def rec(i, curr_sum):
             nonlocal count
 
             if i == len(nums):
-                if sum_so_far == S:
-                    count += 1
-            else:
-                rec(i+1, sum_so_far + nums[i])
-                rec(i+1, sum_so_far - nums[i])
+                count += (curr_sum == S)
+            else:            
+                rec(i+1, curr_sum + nums[i])
+                rec(i+1, curr_sum - nums[i])
 
         count = 0
         rec(0, 0)
-
         return count
 
 ###############################################################################
 """
-Solution 2: Recursion w/ memoization.
+Solution 2: Recursion w/ memoization. (based on solution 1)
+In this case:
+1. index runs from len(nums)-1 to 0 (or < 0)
+2. state vars are index "i" and current target sum "target"
+ 
 """
 class Solution2:
     def findTargetSumWays(self, nums: List[int], S: int) -> int:
         def num_ways(i, target):
             nonlocal cache
 
-            if i == 0:
-                return (nums[0] == target) + (nums[0] == -target)
+            if (i, target) in cache:
+                return cache[(i, target)]
 
-            # take positive sign for nums[i]
-            sum_pos = target - nums[i]
-            if (i, sum_pos) not in cache: 
-                cache[(i, sum_pos)] = num_ways(i-1, sum_pos)
+            #if i == 0:
+            #    return (nums[0] == target) + (nums[0] == -target)
+            if i < 0:
+                return target == 0
+
+            pos_ways = num_ways(i-1, target - nums[i]) # take +nums[i] for sum
+            neg_ways = num_ways(i-1, target + nums[i]) # take -nums[i] for sum
             
-            pos_ways = cache[(i, sum_pos)]
+            cache[(i, target)] = pos_ways + neg_ways
 
-            # take negative sign for nums[i]
-            sum_neg = target + nums[i]
-            if (i, sum_neg) not in cache: 
-                cache[(i, sum_neg)] = num_ways(i-1, sum_neg)
-
-            neg_ways = cache[(i, sum_neg)]
-            
             return pos_ways + neg_ways
 
         cache = {}
         return num_ways(len(nums)-1, S)
 
+###############################################################################
+"""
+Solution 2b: Recursion w/ memoization. (based on solution 1b)
+In this case:
+1. index runs from 0 to len(nums)-1.
+2. state vars are index "i" and current sum "curr_sum".
+
+"""
+class Solution2b:
+    def findTargetSumWays(self, nums: List[int], S: int) -> int:
+        def rec(i, curr_sum):
+            nonlocal cache
+
+            if (i, curr_sum) in cache:
+                return cache[(i, curr_sum)]
+
+            if i == len(nums):
+                return (curr_sum == S)
+
+            pos = rec(i+1, curr_sum + nums[i])
+            neg = rec(i+1, curr_sum - nums[i])
+
+            cache[(i, curr_sum)] = pos + neg
+
+            return pos + neg
+        
+        cache = {}
+        return rec(0, 0)
 
 ###############################################################################
 """
-Solution 2b: Recursion w/ memoization.
+Solution 3: Tabulation using dict that maps sums to their frequencies.
 """
-# class Solution2b:
-#     def findTargetSumWays(self, nums: List[int], S: int) -> int:
-#         def rec(i, sum_so_far):
-#             nonlocal count, cache
-
-#             if i == len(nums):
-#                 if sum_so_far == S:
-#                     count += 1
-#             else:
-#                 rec(i+1, sum_so_far + nums[i])
-#                 rec(i+1, sum_so_far - nums[i])
-
-#         cache = {}
-#         count = 0
-#         rec(0, 0)
-
-#         return count
-
-###############################################################################
-"""
-Solution 3: Tabulation using counts dict mapping sums to their frequencies.
-"""
-import collections
-
 class Solution3:
     def findTargetSumWays(self, nums: List[int], S: int) -> int:
-        counts = collections.defaultdict(int)
+        from collections import defaultdict
+
+        counts = defaultdict(int) # rather than plain dict to be careful
         counts[0] = 1
 
         for x in nums:
-            new_counts = collections.defaultdict(int)
+            new_counts = defaultdict(int) # make new object
 
             for old_sum, freq in counts.items():
                 new_counts[old_sum + x] += freq
@@ -168,8 +197,8 @@ class Solution4:
 
 ###############################################################################
 """
-Solution #: Naive.  Use itertools.product to generate all possible Cartesian 
-products of from [-1, 1] of length len(nums).  Use these to calculate sums.
+Solution 5: Naive.  Use itertools.product() to generate all possible Cartesian 
+products of [-1, 1], with length len(nums).  Use these to calculate sums.
 This simulates n for loops.
 
 O(n 2^n) time, where n = length of array
@@ -206,8 +235,8 @@ class Solution5:
 
 if __name__ == "__main__":
     def test(arr, target_sum, comment=None):
-        solutions = [Solution(), Solution1b(), Solution2(), Solution3(), Solution4()]
-        #solutions = [Solution()]
+        solutions = [Solution(), Solution1b(), Solution1c(),
+            Solution2(), Solution2b(), Solution3(), Solution4()]
 
         res = [s.findTargetSumWays(arr, target_sum) for s in solutions]
 
@@ -220,8 +249,8 @@ if __name__ == "__main__":
         print(f"\nSolutions: {res}\n")
 
         
-    comment = "LC example; answer = 5"
-    arr = [1, 1, 1, 1, 1]
+    comment = "LC example; answer = 5; how many ways to choose 4 (+1) and 1 (-1)?"
+    arr = [1, 1, 1, 1, 1] 
     target_sum = 3
     test(arr, target_sum, comment)
 
@@ -238,4 +267,14 @@ if __name__ == "__main__":
     comment = "LC test case that TLE's naive iteration; answer = 6468"
     arr = [18,50,26,2,15,14,14,2,42,43,38,44,24,17,19,25,3,10,42,20]
     target_sum = 24
+    test(arr, target_sum, comment)
+
+    comment = "Trivial case"
+    arr = []
+    target_sum = 0
+    test(arr, target_sum, comment)
+
+    comment = "Trivial case"
+    arr = []
+    target_sum = 1
     test(arr, target_sum, comment)
