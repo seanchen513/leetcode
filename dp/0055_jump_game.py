@@ -30,6 +30,8 @@ from typing import List
 Solution: use greedy tactic of making the maximum possible jump, and
 backing up as needed.
 
+O(n) time...
+O(1) extra space
 """
 class Solution:
     def canJump(self, nums: List[int]) -> bool:
@@ -46,6 +48,8 @@ class Solution:
             if start + x >= end: # x is big enough for us to jump to the end
                 return True
 
+            ### Checking cases x == 0 and x == 1 aren't necessary but
+            ### might be useful.
             #if x == 0: # we were forced here and it's not the last element
             #    return False
             #if x == 1: # only one possible move
@@ -71,44 +75,126 @@ class Solution:
                 return False
 
         return True
-
 ###############################################################################
 """
-Possible solution: Check backwards from last index.
+Solution 2: greedy algo.  This is related to the solution using tabulation,
+where we also chose to check jumps starting from the furthest one.
+Now, instead of just storing the result in the "good" set, we use the
+first good index found.
 
-TLE on LC test case [25000,24999,24998,24997,...]
+O(n) time
+O(1) extra space
+
+https://leetcode.com/problems/jump-game/solution/
 """
 class Solution2:
     def canJump(self, nums: List[int]) -> bool:
-        n = len(nums)
-        if n <= 1:
+        if not nums:
             return True
+            
+        end = len(nums) - 1
+        last_good_pos = end # "good" index
 
-        possible = [False]*n
+        for i in range(end-1, -1, -1):
+            if i + nums[i] >= last_good_pos:
+                last_good_pos = i # update "good" index
 
-        # it's always possible to reach the last index from the last index
-        possible[n-1] = True 
+        return last_good_pos == 0
 
-        for i in range(n-2, -1, -1):
-            x = nums[i] # current value, which is also max jump length
+###############################################################################
+"""
+Solution 3: Recursion.  Try every possible jump.
 
-            end = min(i+x, n-1)
-            possible[i] = any(possible[j] for j in range(i+1, end+1))
+O(2^n) time - proof: https://leetcode.com/problems/jump-game/solution/
+O(n) space for recursion stack
+"""
+class Solution3:
+    def canJump(self, nums: List[int]) -> bool:
+        def can_jump(pos): # can jump from this position to end
+            if pos >= end:
+                return True
 
-            # j = min(i+x, n-1)
-            # while j >= i+1:
-            #     if possible[j]:
-            #         possible[i] = True
-            #         break
-            #     j -= 1
+            furthest = min(pos + nums[pos], end)
 
-        return possible[0]          
+            #for i in range(pos + 1, furthest + 1): # check left to right
+            for i in range(furthest, pos, -1): # check right to left
+                if can_jump(i):
+                    return True
+
+            return False
+
+        end = len(nums) - 1
+        return can_jump(0)
+
+###############################################################################
+"""
+Solution 4: Recursion w/ memoization.
+
+O(n^2) time
+O(n) extra space - for recursion and "good" memo cache.
+
+LC TLE for [2,0,6,9,8,4,5,0,8,9,1,2,9,6,8,8,0,6,3,1,2,2,1,2,6,5,3,1,2,2,6,4,2,4,3,0,0,0,3,8,2,4,0,1,2,0,1,4,6,5,8,0,7,9,3,4,6,6,5,8,9,3,4,3,7,0,4,9,0,9,8,4,3,0,7,7,1,9,1,9,4,9,0,1,9,5,7,7,1,5,8,2,8,2,6,8,2,2,7,5,1,7,9,6]
+"""
+class Solution4:
+    def canJump(self, nums: List[int]) -> bool:
+        def can_jump(pos): # can jump from this position to end
+            if (pos in good) or (pos >= end):
+                return True
+
+            furthest = min(pos + nums[pos], end)
+
+            #for i in range(pos + 1, furthest + 1): # check left to right
+            for i in range(furthest, pos, -1): # check right to left
+                if can_jump(i):
+                    good.add(i)
+                    return True
+
+            return False
+
+        end = len(nums) - 1
+
+        # Cache for memoization.
+        # Elements in set are array indices for which it's possible to jump
+        # from to eventually reach the last index.
+        good = set([end])
+        
+        return can_jump(0)
+
+###############################################################################
+"""
+Solution 5: tabulation
+
+O(n^2) time
+O(n) extra space for "good" set
+
+LC overall TLE
+"""
+class Solution5:
+    def canJump(self, nums: List[int]) -> bool:
+        if not nums:
+            return True
+        
+        end = len(nums) - 1
+        good = set([end])
+
+        for i in range(end-1, -1, -1):
+            furthest = min(i + nums[i], end)
+
+            #for j in range(i+1, furthest+1): # check left to right
+            for j in range(furthest, i, -1): # check right to left
+                if j in good:
+                    good.add(i)
+                    break
+    
+        return 0 in good
 
 ###############################################################################
 
 if __name__ == "__main__":
     def test(arr, comment=None):
-        solutions = [Solution(), Solution2()]
+        #solutions = [Solution(), Solution2(), Solution3(), Solution4(), 
+        #    Solution5()]
+        solutions = [Solution(), Solution2()] # just the greedy solutions
 
         res = [s.canJump(arr) for s in solutions]
 
@@ -158,6 +244,10 @@ if __name__ == "__main__":
     
     comment = "LC test case; answer = True"
     arr = [3,0,8,2,0,0,1]
+    test(arr, comment)
+
+    comment = "LC test case; memoization TLE; answer = False"
+    arr = [2,0,6,9,8,4,5,0,8,9,1,2,9,6,8,8,0,6,3,1,2,2,1,2,6,5,3,1,2,2,6,4,2,4,3,0,0,0,3,8,2,4,0,1,2,0,1,4,6,5,8,0,7,9,3,4,6,6,5,8,9,3,4,3,7,0,4,9,0,9,8,4,3,0,7,7,1,9,1,9,4,9,0,1,9,5,7,7,1,5,8,2,8,2,6,8,2,2,7,5,1,7,9,6]
     test(arr, comment)
 
     comment = "Trivial case"
