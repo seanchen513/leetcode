@@ -53,10 +53,16 @@ from typing import List
 
 ###############################################################################
 """
-Solution 1: tabulation using max_visits array.
+Solution 1: tabulation using "visits" array.
 
 Build up a solution by finding max_visits for indices with the
 smallest values first.
+
+O(n log n + n*d) time where n is length of array
+O(n log n) time for sorting the array
+O(n*d) time for the nested loops
+
+O(n) extra space for the "values" array
 """
 class Solution:
     def maxJumps(self, arr: List[int], d: int) -> int:
@@ -138,6 +144,9 @@ class Solution2:
 ###############################################################################
 """
 Solution 3: memoization
+
+O(n*d) time since results for each call of num_visits() is cached
+O(n) extra space - for max_visits array
 """
 class Solution3:
     def maxJumps(self, arr: List[int], d: int) -> int:
