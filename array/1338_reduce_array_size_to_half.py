@@ -47,7 +47,10 @@ from collections import Counter
 
 ###############################################################################
 """
-Solution: use collections.Counter(arr).values() and reverse sort.
+Solution: greedy
+
+Have to return minimum set size, so want to include the most frequent
+values first.  Use collections.Counter(arr).values() and reverse sort.
 Then count how many (unique) values need to be added together.
 """
 class Solution:
