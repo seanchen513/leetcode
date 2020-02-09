@@ -47,7 +47,11 @@ from typing import List
 import collections
 
 ###############################################################################
-
+"""
+Solution 1: Use dict to countr character frequencies in one string.  Then
+loop through other string and subtract from those frequencies in the dict,
+but don't go negative.
+"""
 class Solution:
     def minSteps(self, s: str, t: str) -> int:
         d = collections.defaultdict(int)
@@ -62,6 +66,29 @@ class Solution:
         return sum(d.values())
 
 ###############################################################################
+"""
+Solution 2: use collections.Counter() to count frequencies in both strings,
+and subtract frequencies only when one the frequency for one string is larger
+than that of the other (choose on a consistent basis).
+
+O(n) time
+O(n) extra space
+"""
+class Solution2:
+    def minSteps(self, s: str, t: str) -> int:
+        import string
+
+        res = 0
+        s = collections.Counter(s)
+        t = collections.Counter(t)
+
+        #for ch in s:
+        for ch in string.ascii_lowercase:
+            res += s[ch] - t[ch] if s[ch] > t[ch] else 0
+            
+        return res
+        
+###############################################################################
 
 if __name__ == "__main__":
     def test(s, t, comment):
@@ -75,7 +102,8 @@ if __name__ == "__main__":
         print(f"\nresult = {res}")
 
 
-    sol = Solution()
+    #sol = Solution()
+    sol = Solution2() # use Counter()
 
     comment = "LC ex1; answer = 1"
     s = "bab"
