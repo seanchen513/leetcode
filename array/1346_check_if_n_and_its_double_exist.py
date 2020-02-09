@@ -34,6 +34,7 @@ Constraints:
 """
 
 from typing import List
+import collections
 
 ###############################################################################
 
@@ -53,6 +54,21 @@ class Solution:
 
 ###############################################################################
 
+class Solution2:
+  def checkIfExist(self, arr: List[int]) -> bool:
+    s = collections.Counter(arr)
+    
+    if s[0] > 1: 
+        return True
+    
+    for x in arr:
+        if s[2 * x] and x != 0:
+            return True
+    
+    return False
+
+###############################################################################
+
 if __name__ == "__main__":
     def test(arr, comment):
         print("="*80)
@@ -68,7 +84,8 @@ if __name__ == "__main__":
 
         print(f"\nresult = {res}")
 
-    s = Solution()
+    #s = Solution() # use set
+    s = Solution2() # use Counter()
 
     comment = "LC ex1; answer = True"
     arr = [10,2,5,3]
