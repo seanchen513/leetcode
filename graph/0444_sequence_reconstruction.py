@@ -117,7 +117,7 @@ class Solution:
 ###############################################################################
 
 if __name__ == "__main__":
-    def test(org, seqs, comment):
+    def test(org, seqs, comment=None):
         print("="*80)
         if comment:
             print(comment)

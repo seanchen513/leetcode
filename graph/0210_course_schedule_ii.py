@@ -114,7 +114,7 @@ class Solution2:
 ###############################################################################
 
 if __name__ == "__main__":
-    def test(n, arr, comment):
+    def test(n, arr, comment=None):
         print("="*80)
         if comment:
             print(comment)
