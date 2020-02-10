@@ -410,10 +410,11 @@ if __name__ == "__main__":
 
         res = s.canFinish(n, arr)
 
+        print(f"\nn = {n}")
         print(f"\n{arr[:20]}")
-        print(f"\nlen(arr) = {len(arr)}")
-        if len(arr) > 20:
-            print(" (only show at most 20 elements)")
+        #print(f"\nlen(arr) = {len(arr)}")
+        #if len(arr) > 20:
+        #    print(" (only show at most 20 elements)")
 
         print(f"\nresult = {res}")
 
@@ -457,4 +458,9 @@ if __name__ == "__main__":
     comment = "G4G example; answer = True"
     n = 6
     arr = [[2,3],[3,1],[4,0],[4,1],[5,0],[5,2]]
+    test(n, arr, comment)
+
+    comment = "LC210 ex2; answer = True"
+    n = 4
+    arr = [[1,0],[2,0],[3,1],[3,2]]
     test(n, arr, comment)
