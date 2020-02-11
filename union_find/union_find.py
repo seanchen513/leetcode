@@ -29,8 +29,8 @@ class SimpleUnionFind:
         return x
     
     def union(self, x, y):
-        px = self.par(x)
-        py = self.par(y)
+        px = self.par[x]
+        py = self.par[y]
 
         if px != py:
             self.par[px] = py
