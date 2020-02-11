@@ -53,7 +53,7 @@ import collections
 
 ###############################################################################
 """
-Solution: BFS using deque, front to end.
+Solution: BFS using deque; front to end; track back links instead of in-degrees.
 
 LeetCode Feb 10, 2020:
 Runtime: 24 ms, faster than 97.48% of Python3 online submissions
@@ -62,7 +62,8 @@ Memory Usage: 12.8 MB, less than 100.00% of Python3 online submissions
 class Solution:
     def alienOrder(self, words: List[str]) -> str:
         ### Build graph.
-        letters = set([ch for w in words for ch in w])
+        #letters = set([ch for w in words for ch in w])
+        letters = set("".join(words))
         graph = {ch: set() for ch in letters}
         back = collections.defaultdict(set)
 
@@ -84,7 +85,7 @@ class Solution:
 
         while q:
             node = q.popleft()
-            res += [node]
+            res.append(node)
 
             for nbr in graph[node]:
                 back[nbr].remove(node)
@@ -95,10 +96,8 @@ class Solution:
             back.pop(node) # back[node] is empty set
 
         #print(f"back = {back}")
-        if back: # graph has a cycle    
-            return ""
-        
-        return "".join(res)
+        ## back is nonempty if graph has a cycle      
+        return "" if back else "".join(res) 
 
 ###############################################################################
 
