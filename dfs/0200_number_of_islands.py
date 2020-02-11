@@ -188,7 +188,7 @@ class Solution3:
                     q = collections.deque([(i, j)])
                     while q:
                         #print(len(q))
-                        r, c = q.pop()
+                        r, c = q.popleft()
 
                         if (r+1 < n_rows) and grid[r+1][c] == "1":
                             q.append((r+1, c))
