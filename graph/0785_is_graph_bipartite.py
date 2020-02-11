@@ -11,6 +11,7 @@ The graph is given in the following form: graph[i] is a list of indexes j for wh
 Example 1:
 Input: [[1,3], [0,2], [1,3], [0,2]]
 Output: true
+
 Explanation: 
 The graph looks like this:
 0----1
@@ -22,6 +23,7 @@ We can divide the vertices into two groups: {0, 2} and {1, 3}.
 Example 2:
 Input: [[1,2,3], [0,2], [0,1,3], [0,2]]
 Output: false
+
 Explanation: 
 The graph looks like this:
 0----1
@@ -40,10 +42,9 @@ The graph is undirected: if any element j is in graph[i], then i will be in grap
 from typing import List
 import collections
 
-
 ###############################################################################
 """
-Solution 2: DFS.
+Solution: DFS.
 
 O(n) time
 O(n) extra space for "colors" array.
@@ -150,7 +151,7 @@ class Solution2b:
 ###############################################################################
 
 if __name__ == "__main__":
-    def test(graph, comment):
+    def test(graph, comment=None):
         print("="*80)
         if comment:
             print(comment)
