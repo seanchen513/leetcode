@@ -254,7 +254,7 @@ class Solution5b:
 ###############################################################################
 
 if __name__ == "__main__":
-    def test(arr, comment=None):
+    def test(grid, comment=None):
         print("="*80)
         if comment:
             print(comment, "\n")
