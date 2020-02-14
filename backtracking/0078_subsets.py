@@ -29,8 +29,9 @@ import itertools
 """
 Solution 1: recursion.
 
-Runtime: 32 ms, faster than 68.34% of Python3 online submissions
-Memory Usage: 13 MB, less than 100.00% of Python3 online submissions
+O(2^n) time
+O(2^n) space: for storing subsets.
+O(n) space: for recursive stack space.
 """
 class Solution:
 	def subsets(self, arr: List[int]) -> List[List[int]]:
@@ -51,9 +52,6 @@ class Solution:
 ###############################################################################
 """
 Solution 2: iteration.
-
-Runtime: 28 ms, faster than 88.45% of Python3 online submissions
-Memory Usage: 12.9 MB, less than 100.00% of Python3 online submissions
 """
 class Solution2:
 	def subsets(self, arr: List[int]) -> List[List[int]]:

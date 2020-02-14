@@ -36,13 +36,40 @@ import itertools
 """
 Solution 1: recursion
 
+Runtime: 48 ms, faster than 92.84% of Python3 online submissions
+Memory Usage: 12.7 MB, less than 100.00% of Python3 online submissions
+"""
+class Solution:
+	def combinationSum(self, candidates: List[int], target: int) -> List[List[int]]:
+		def rec(cand_index=0, tgt=target, combo=[]):
+			if tgt == 0:
+				res.append(combo)
+				return
+
+			for i in range(cand_index, n):
+				c = candidates[i]
+				if c > tgt:
+					continue
+
+				rec(i, tgt - c, combo + [c])
+
+		n = len(candidates)
+		res = []
+
+		rec()
+
+		return res
+###############################################################################
+"""
+Solution 1b: recursion, using initial sort and early exit.
+
 https://leetcode.com/problems/combination-sum/discuss/16510/Python-dfs-solution.
 https://leetcode.com/problems/combination-sum/discuss/16554/Share-My-Python-Solution-beating-98.17
 
 Runtime: 44 ms, faster than 97.40% of Python3 online submissions
 Memory Usage: 12.8 MB, less than 100.00% of Python3 online submissions
 """
-class Solution:
+class Solution1b:
 	def combinationSum(self, candidates: List[int], target: int) -> List[List[int]]:
 		def rec(cand_index=0, tgt=target, combo=[]):
 			if tgt == 0:
@@ -63,6 +90,7 @@ class Solution:
 		rec()
 
 		return res
+
 
 ###############################################################################
 """
@@ -150,7 +178,8 @@ if __name__ == "__main__":
 		print(f"\nSolution: {res}\n")
 
 
-	sol = Solution() # recursive
+	sol = Solution() # recursion
+	sol = Solution1b() # recursion, using initial sort and early exit
 	#sol = Solution2() # recursion, 1st attempt
 	#sol = Solution3() # iterative, 1st attempt
 	#sol = Solution4() # use itertools.combinations_with_replacement

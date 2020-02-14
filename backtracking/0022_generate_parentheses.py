@@ -32,7 +32,7 @@ which is bounded asymptotically by (4^n)/(n^(3/2)).
 
 O(4^n / sqrt(n)) time: each sequence has at most n steps during backtracking.
 
-O(same?) extra space for recursion.
+O(same) extra space for recursion.
 
 Runtime: 20 ms, faster than 99.51% of Python3 online submissions
 Memory Usage: 13.1 MB, less than 95.56% of Python3 online submissions
