@@ -60,16 +60,18 @@ class Solution1b:
         merged = []
 
         for interval in s:
-            # first interval, or start of interval < end of previous interval
-            if not merged or merged[-1][1] < interval[0]:
+            # first interval, or start of interval > end of previous interval
+			# so there is no overlap
+            if (not merged) or (merged[-1][1] < interval[0]):
                 merged.append(interval)
-            else: # interval overlaps previous interval, so set the end...
+
+            else: # interval overlaps previous interval, so set the end
+				# of the interval accordingly
                 merged[-1][1] = max(merged[-1][1], interval[1])
 
         return merged
         
 ###############################################################################
-
 """
 Solution 2: use sorting; in-place version, modifies "intervals"
 
@@ -156,15 +158,14 @@ if __name__ == "__main__":
 
     s = Solution()   # sorting
     s = Solution1b() # rewrite
-    s = Solution2()  # sorting; in-place
-    s = Solution2b() # rewrite
+    #s = Solution2()  # sorting; in-place
+    #s = Solution2b() # rewrite
     #s = Solution3() # connected components; NOT DONE
 
     comment = "LC ex1; answer = [[1,6],[8,10],[15,18]]"
     arr = [[1,3],[2,6],[8,10],[15,18]]
     test(arr, comment)
-
-    
+   
     comment = "LC ex2; answer = [[1,5]]"
     arr = [[1,4],[4,5]]
     test(arr, comment)
