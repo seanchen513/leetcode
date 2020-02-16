@@ -70,8 +70,8 @@ class Solution2:
 
         s = sorted(intervals) # sorted by start time first, then by end time
 
-        rooms = []
-        heapq.heappush(rooms, s[0][1]) # end time of first meeting
+		# min heap of end times of meetings, or when the room frees up
+        rooms = [s[0][1]] # start with end time of first meeting
 
         for i in range(1, len(s)):
             # If the first room to free up does so before or at the same time
@@ -80,6 +80,16 @@ class Solution2:
                 heapq.heappop(rooms)
 
             heapq.heappush(rooms, s[i][1]) # start the current meeting
+
+		# Note: we free up only the rooms required to hold new meetings.
+		# Some meetings might have already ended, but they are still in the
+		# heap.  The heap only grows in size, and stays the same size once
+		# it reaches the maximum number of rooms required.
+
+		# If we wanted to free up all rooms possible, we could change the 
+		# "if" within loop to a nested loop, freeing all the rooms whose 
+		# meetings have ended.  Then we would need to keep track of the max 
+		# size of the heap.
 
         return len(rooms)
 
