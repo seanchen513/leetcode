@@ -284,6 +284,10 @@ with:
 
 prev_val = mx % (s - mx) 
 
+Reason:
+prev_val = mx - others = mx - (s - mx)
+Taking modulo is just repeated subtraction of (s - mx).
+
 Runtime: 260 ms, faster than 99.32% of Python3 online submissions
 Memory Usage: 18.1 MB, less than 100.00% of Python3 online submissions
 """
