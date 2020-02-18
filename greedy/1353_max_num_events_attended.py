@@ -112,7 +112,8 @@ events, instead of iterating through all possible days.
 O(n log n): sorting dominates the O(n) part.  The loop is O(n) since days
 are only incremented or set as needed.
 
-O() extra space
+O(n) extra space: for heap, in case all n events end as late as possible.
+Then they stay on the heap until we choose to attend them one by one.
 
 Runtime: 848 ms, faster than 90.97% of Python3 online submissions
 Memory Usage: 47.3 MB, less than 100.00% of Python3 online submissions
@@ -139,17 +140,17 @@ class Solution1b:
 			while events and events[-1][0] <= day:
 				heapq.heappush(h, events.pop()[1])
 
+			# Attend the event that is currently ongoing (starting today or 
+			# has already started) and has the earliest end time.  In the
+			# prior iteration, we already removed events ending before today.
+			heapq.heappop(h)
+			count += 1
+			day += 1
+
 			# Remove events (ending times) from the heap that already 
-			# ended (before today).
+			# ended, including today (since we just incremented day).
 			while h and h[0] < day:
 				heapq.heappop(h)
-
-			# Attend the event that is currently ongoing (starting today or 
-			# has already started) and has the earliest end time.
-			if h:
-				heapq.heappop(h)
-				count += 1
-				day += 1
 
 		return count
 
@@ -203,7 +204,7 @@ if __name__ == "__main__":
 
 
 	sol = Solution()
-	#sol = Solution1b()
+	sol = Solution1b()
 	#sol = Solution2()
 	
 	comment = "LC ex1; answer = 3"
