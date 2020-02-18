@@ -32,8 +32,11 @@ from typing import List
 
 ###############################################################################
 """
-Solution 1: sort intervals by starting endpoint.  Check if adjacent intervals
-overlap.  If they do, keep the one with the smaller right endpoint.
+Solution 1: Greedy algo.  Sort intervals by starting endpoint.  Keep count of
+number of intervals discarded.
+
+Check if adjacent intervals overlap.  If they do, keep the one with the 
+smaller right endpoint.
 
 O(n log n): due to sorting.  Loop is O(n).
 O(1) extra space: for in-place sort.
@@ -46,7 +49,7 @@ class Solution:
 		a.sort()
 		
 		n = len(a)
-		count = 0
+		count = 0 # number of intervals discarded
 		last_endpt = a[0][1]
 		
 		for i in range(1, n):
@@ -56,14 +59,16 @@ class Solution:
 			else:
 				last_endpt = a[i][1]
 				
-				
 		return count
 
 ###############################################################################
 """
-Solution 2: sort intervals by right endpoint.  Check if adjacent intervals
-overlap.  If they don't overlap, keep the current interval.  If they overlap,
-then discard the current interval since it has a greater right endpoint.
+Solution 2: Greedy algo.  Sort intervals by right endpoint.  Keep count of
+number of non-overlapping intervals.
+
+Check if adjacent intervals overlap.  If they don't overlap, keep the current
+interval.  If they overlap, then discard the current interval since it has a 
+greater right endpoint.
 
 O(n log n): due to sorting.  Loop is O(n).
 O(1) extra space: for in-place sort.
@@ -76,7 +81,7 @@ class Solution2:
 		a.sort(key=lambda x: x[1])
 		
 		n = len(a)
-		count = 1
+		count = 1 # count of non-overlapping intervals
 		last_endpt = a[0][1]
 		
 		for i in range(1, n):
@@ -84,7 +89,80 @@ class Solution2:
 				count += 1
 				last_endpt = a[i][1]
 				
-		return n - count
+		return n - count # number of intervals discarded
+
+###############################################################################
+"""
+Solution 3: DP, sorting by left endpoints.
+
+dp[i] = number of non-overlapping intervals up to interval i
+
+dp[i] = max(dp[j]) + 1 for 0 <= j < i, where intervals i and j don't overlap
+
+O(n^2) time: need a nested loop to check max(dp[j]).
+O(n) extra space: for dp table.
+"""
+class Solution3:
+	def eraseOverlapIntervals(self, a: List[List[int]]) -> int:
+		if not a:
+			return 0
+
+		a.sort()
+		n = len(a)
+		dp = [1]*n # number of non-overlapping intervals up to interval i
+
+		for i in range(n):
+			mx = 0
+
+			for j in range(i):
+				if a[i][0] >= a[j][1]: # no overlap
+					mx = max(mx, dp[j])
+
+			dp[i] = mx + 1
+
+		return n - max(dp) # number of intervals discarded
+
+###############################################################################
+"""
+Solution 4: DP, sorting by right endpoints.
+
+dp[i] = number of non-overlapping intervals up to interval i
+
+dp[i] = max(dp[i-1], 1 + max(dp[j])) for 0 <= j < i, 
+where intervals i and j don't overlap
+
+There are 2 cases:
+(1) Include interval i as a non-overlapping interval.  Need to review prior
+intervals j to check which ones don't overlap with interval i.  Take the
+max(dp[j]) of these and add 1 for interval i.  Suffices to find the largest
+such j by traversing backwards from i-1.
+
+(2) Don't include interval i as a non-overlapping interval.  Then the number
+of non-overlapping intervals is just incremented by 1.
+
+O(n^2) time: need a nested loop to check max(dp[j]).
+O(n) extra space: for dp table.
+"""
+class Solution4:
+	def eraseOverlapIntervals(self, a: List[List[int]]) -> int:
+		if not a:
+			return 0
+
+		a.sort(key=lambda x: x[1])
+		n = len(a)
+		dp = [1]*n # number of non-overlapping intervals up to interval i
+
+		for i in range(n):
+			mx = 0
+
+			for j in range(i-1, -1, -1):
+				if a[i][0] >= a[j][1]: # no overlap
+					mx = max(mx, dp[j])
+					break
+
+			dp[i] = max(dp[i-1], 1 + mx)
+
+		return n - max(dp) # number of intervals discarded
 
 ###############################################################################
 
@@ -102,8 +180,10 @@ if __name__ == "__main__":
 		print(f"\nres = {res}")
 
 
-	sol = Solution()
-	sol = Solution2()
+	sol = Solution() # greedy, sort by left endpoints
+	sol = Solution2() # greedy, sort by right endpoints
+	sol = Solution3() # DP, sort by left endpoints
+	sol = Solution4() # DP, sort by right endpoints
 
 	comment = "LC ex1; answer = 1"
 	arr = [[1,2],[2,3],[3,4],[1,3]]
