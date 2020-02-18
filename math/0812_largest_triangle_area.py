@@ -163,31 +163,27 @@ class Solution2b:
 """
 Solution 3: find convex hull first.  Then use Shoelace formula on points on it.
 
-On LC, this is about 10 times faster than not using the convex hull.
-
 https://en.wikibooks.org/wiki/Algorithm_Implementation/Geometry/Convex_hull/Monotone_chain#Python
 
-Runtime: 28 ms, faster than 100.00% of Python3 online submissions
-Memory Usage: 12.8 MB, less than 100.00% of Python3 online submissions
+Runtime: 24 ms, faster than 100.00% of Python3 online submissions
+Memory Usage: 12.6 MB, less than 100.00% of Python3 online submissions
 """
 class Solution3:
 	def largestTriangleArea(self, points: List[List[int]]) -> float:
-		def boundary(points):
-			## Use set() to remove duplicates.
-			## Convert each point from list to tuple to make them hashable,
-			## so that set() can be applied.  Convert set to list so we
-			## can use reversed(points) for building upper hull.
-			#points = list(set(map(tuple, points)))
-			
-			# Replaced line above because it's slow on LC, probably because
-			# of huge number of points in some test cases.  It might be ok
-			# if the input was given as a list of tuples instead.
-			# Apply set() in return statement instead.
-			points = sorted(points)
+		def boundary(points): # O(n log n)
+			# Use set() to remove duplicates.
+			# Convert each point from list to tuple to make them hashable,
+			# so that set() can be applied.  Convert set to list so we
+			# can use sort, and also to use reversed(points) for building 
+			# upper hull later.  Sorts by x coordinate, then y coordinate.
+			# Alternatively, can just sort points as list of lists, and
+			# apply set() in the return statement.
+			points = sorted(list(set(map(tuple, points))))
+			#points = sorted(points)
 
 			## Don't need this part for LC812 since len(points) >= 3
 			#if len(points) <= 1:
-			#	return points
+			#	return set(points)
 
 			# 2D cross product of OA and OB vectors, ie, z-component of
 			# their 3D cross product.  Positive if OAB is CCW, negative if
@@ -198,23 +194,24 @@ class Solution3:
 			# Build lower hull.
 			lower = []
 			for p in points:
+				# While the last two points in lower along with the current
+				# point (in that order) form a CW pattern, remove the last 
+				# point from from lower.
 				while len(lower) >= 2 and cross(lower[-2], lower[-1], p) < 0: 
 					lower.pop()
-				lower.append(tuple(p))
+				lower.append(p)
 			
 			# Build upper hull.
 			upper = []
 			for p in reversed(points):
 				while len(upper) >= 2 and cross(upper[-2], upper[-1], p) < 0: 
 					upper.pop()
-				upper.append(tuple(p))
+				upper.append(p)
 			
 			## Last point of each list is omitted because it's repeated at
 			## the beginning of the other list.
-			#return lower[:-1] + upper[:-1]
-
-			# Use set() to remove duplicate points.
-			return set(lower[:-1] + upper[:-1]) # or convert to list if needed
+			return lower[:-1] + upper[:-1]
+			# return set(lower[:-1] + upper[:-1])
 
 		p = boundary(points)
 		res = 0
