@@ -58,7 +58,7 @@ end soonest.
 
 Each day is only considered once.  Each event is pushed once and popped once.
 
-? O(d + n log n) time, where n = number of events, and d = number of days.
+O(n log n) time, where n = number of events, due to sorting.  Loop is O(n).
 
 O(n) extra space: for heap, in case all n events end as late as possible.
 Then they stay on the heap until we choose to attend them one by one.
@@ -68,8 +68,8 @@ LC doesn't have enough good test cases.
 
 https://leetcode.com/problems/maximum-number-of-events-that-can-be-attended/discuss/510263/JavaC%2B%2BPython-Priority-Queue
 
-Runtime: 1356 ms, faster than 33.33% of Python3 online submissions
-Memory Usage: 47.2 MB, less than 100.00% of Python3 online submissions
+Runtime: 912 ms, faster than 74.37% of Python3 online submissions
+Memory Usage: 47.4 MB, less than 100.00% of Python3 online submissions
 """
 class Solution:
 	def maxEvents(self, events: List[List[int]]) -> int:
@@ -78,13 +78,17 @@ class Solution:
 		events.sort(reverse=True)
 		
 		h = [] # min heap of end times
-		count = 0
+		count = 0 # number of events attended
+
+		# number of events left to consider; used to break loop early
+		n_events = len(events)
 
 		for day in range(1, 100001): # today
 			# Remove events that start on or before today from the list and 
 			# add their end times to the heap.
 			while events and events[-1][0] <= day:
 				heapq.heappush(h, events.pop()[1])
+				n_events -= 1
 
 			# Remove events (ending times) from the heap that already 
 			# ended (before today).
@@ -96,6 +100,8 @@ class Solution:
 			if h:
 				heapq.heappop(h)
 				count += 1
+			elif n_events <= 0:
+				break
 
 		return count
 
@@ -107,6 +113,9 @@ O(n log n): sorting dominates the O(n) part.  The loop is O(n) since days
 are only incremented or set as needed.
 
 O() extra space
+
+Runtime: 848 ms, faster than 90.97% of Python3 online submissions
+Memory Usage: 47.3 MB, less than 100.00% of Python3 online submissions
 """
 class Solution1b:
 	def maxEvents(self, events: List[List[int]]) -> int:
@@ -167,7 +176,7 @@ class Solution2:
 		events.sort(key=lambda x: x[1])
 		#print(f"\nsorted = {events}")
 
-		used = set()
+		used = set() # days that have been used to attend an event
 
 		for start, end in events:
 			for d in range(start, end + 1):
@@ -194,7 +203,7 @@ if __name__ == "__main__":
 
 
 	sol = Solution()
-	sol = Solution1b()
+	#sol = Solution1b()
 	#sol = Solution2()
 	
 	comment = "LC ex1; answer = 3"
