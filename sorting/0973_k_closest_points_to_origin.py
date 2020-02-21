@@ -252,9 +252,41 @@ class Solution5b:
 """
 Solution 5c: same as sol 5, but more Pythonic.
 """
-class Solution5b:
+class Solution5c:
     def kClosest(self, points: List[List[int]], k: int) -> List[List[int]]:
-        pass
+        def select(a, k):
+            # invalid args
+            if k < 0 or k >= len(a):
+                return
+
+            if len(a) == 1:
+                return a[0]
+
+            # Pick random initial pivot.
+            p = random.randint(0, len(a)-1) # inclusive
+            pivot = a[p]
+
+            smaller = [x for x in a if x < pivot]
+            bigger = [x for x in a if x > pivot]
+            pivots = [x for x in a if x == pivot]
+
+            if k < len(smaller):
+                return select(smaller, k)
+            elif k < len(smaller) + len(pivots):
+                return pivot
+            else:
+                return select(bigger, k - len(smaller) - len(pivots))
+
+        # Build augmented points list with squared distances.
+        a = [(x*x + y*y, x, y) for x, y in points]
+        
+        # Throw away return value since we just care that first k elements
+        # of "a" become sorted and smallest in "a".
+        select(a, k-1)
+        
+        return [[x, y] for _, x, y in a[:k]]
+
+
 
 ###############################################################################
 
@@ -278,6 +310,7 @@ if __name__ == "__main__":
     sol = Solution4() # use heapq.nsmallest()
     sol = Solution5() # divide & conquer using quick select
     #sol = Solution5b() # same as sol 6, but using lambda or dist()
+    sol = Solution5c() # Pythonic quick select
 
     comment = "LC ex1; answer = [[-2,2]]"
     points = [[1,3],[-2,2]]
