@@ -234,11 +234,59 @@ class Solution2:
 
 ###############################################################################
 """
-Solution 3: BFS.
+Solution 3: use counting sort to help build up solution.
+
+Based on:
+https://leetcode.com/problems/largest-multiple-of-three/discuss/517704/Java-Basic-Multiple-of-3-Clean-code-O(N)-~-2ms
+"""
+import itertools
+class Solution3:
+    def largestMultipleOfThree(self, digits: List[int]) -> str:
+        count = collections.Counter(digits) # O(n)
+
+        count_r1 = count[1] + count[4] + count[7] # num elts w/ remainder 1
+        count_r2 = count[2] + count[5] + count[8] # num elts w/ remainder 2
+
+        rem = (count_r1 + 2 * count_r2) % 3 # same as sum(digits) % 3
+
+        if rem == 1:
+            if count_r1 >= 1: # delete smallest digit w/ remainder 1
+                count_r1 -= 1
+            else: # delete 2 smallest digits with remainder 2
+                count_r2 -= 2
+
+        elif rem == 2:
+            if count_r2 >= 1: # delete smallest digit w/ remainder 2
+                count_r2 -= 1
+            else: # delete 2 smallest digits with remainder 1
+                count_r1 -= 2
+        
+        start = 0
+        for d in range(9, -1, -1):
+            cnt = count[d]
+            if d % 3 == 1:
+                cnt = min(cnt, count_r1)    
+                count_r1 -= cnt
+            elif d % 3 == 2:
+                cnt = min(cnt, count_r2)
+                count_r2 -= cnt
+
+            digits[start:start+cnt] = [d]*cnt
+            start += cnt
+
+        if digits[0] == 0:
+            return "0"
+
+        #return "".join(map(str, digits[:start]))
+        return "".join(map(str, itertools.islice(digits, start)))
+
+###############################################################################
+"""
+Solution 4: BFS.
 
 LC: Memory Limit Exceeded
 """
-class Solution3:
+class Solution4:
     def largestMultipleOfThree(self, digits: List[int]) -> str:
         s1 = sum(digits)
         if s1 == 0:
@@ -288,7 +336,8 @@ if __name__ == "__main__":
     sol = Solution() # math
     #sol = Solution1b() # same as sol 1, rewritten
     #sol = Solution2() # same idea, but use more list processing
-    #sol = Solution3() # BFS; LC: memory limit exceeded 
+    sol = Solution3() # use counting sort...
+    #sol = Solution4() # BFS; LC: memory limit exceeded 
 
     comment = "LC ex1; answer = 981"
     arr = [8,1,9]
