@@ -87,11 +87,21 @@ Solution: Find if there is only one possible root first, then use BFS traversal
 to check if we can visit all nodes from that root.  
 Use set to track seen elements.
 
+Basically, the solution is checking for a tree by checking that there is 
+exactly one root and all other nodes have exactly one parent and can be 
+visited from that root.
+
 I posted here:
 https://leetcode.com/problems/validate-binary-tree-nodes/discuss/518458/Python3-Check-if-there-is-only-one-possible-root-then-use-BFS-to-try-to-visit-all-nodes
 
 O(n) time
 O(n) extra space: for set.
+
+Note:
+We can avoid the set subtraction in "root = (set(range(n)) - seen).pop()" by 
+using an "unseen" set rather than a "seen" set. That way, at the end, for 
+valid binary trees, "unseen" will have exactly the root. However, we would have
+to initialize with "unseen = set(range(n))".
 
 Runtime: 308 ms, faster than 100.00% of Python3 online submissions
 Memory Usage: 15 MB, less than 100.00% of Python3 online submissions
@@ -134,13 +144,11 @@ class Solution:
         # are no cycles.
 
         # Now, check if we can visit all nodes from the root, using BFS.
-        # Instead of using a set, can just use a simple counter (or decrement n
-        # and check if it's 0 at the end) since we already checked uniqueness.
         q = collections.deque([root])
 
         while q:
             x = q.popleft()
-            n -= 1
+            n -= 1 # use parameter as reverse counter for num nodes visited
 
             if leftChild[x] != -1:
                 q.append(leftChild[x])
@@ -148,8 +156,49 @@ class Solution:
                 q.append(rightChild[x])
 
         # If n == 0, then we visited n nodes.
-        return True if n == 0 else False
+        return n == 0
 
+
+###############################################################################
+"""
+Solution 2: use parents dict.
+
+Essentially the same idea as solution 1.  Use parents dict to check that all
+but 1 node (ie, n-1 nodes) has a unique parent, and they can all be visited
+in a single traversal.
+
+https://leetcode.com/problems/validate-binary-tree-nodes/discuss/518084/JavaScript-Simple-solution-using-map-and-some-binary-tree-properties
+
+Runtime: 296 ms, faster than 100.00% of Python3 online submissions
+Memory Usage: 14.4 MB, less than 100.00% of Python3 online submissions
+"""
+class Solution2:
+    def validateBinaryTreeNodes(self, 
+        n: int, leftChild: List[int], rightChild: List[int]) -> bool:
+        
+        parents = {}
+        
+        # Assume nodes are 0 through n-1.
+        for i in range(n):
+            left = leftChild[i]
+            right = rightChild[i]
+
+            if i == left or i == right: # self-loops
+                return False
+            
+            if i in parents and (parents[i] == left or parents[i] == right): # 2-cycle         
+                return False
+
+            if left in parents or right in parents: # cycle; left or right visited already
+                return False
+
+            if left != -1:
+                parents[left] = i
+            if right != -1:
+                parents[right] = i
+
+        return len(parents) == n - 1
+        
 ###############################################################################
 """
 NOT Solution: use set...  This passes OJ, though.
@@ -203,8 +252,8 @@ if __name__ == "__main__":
 
 
     sol = Solution() # traversal, with set to track seen elements.
+    sol = Solution2() # use parents dict
     #sol = SolutionNOT() # use set
-    #sol = Solution2() #
 
     comment = "LC ex1; answer = True"
     n = 4
@@ -280,7 +329,7 @@ if __name__ == "__main__":
 
     comment = "trivial case; answer = True"
     n = 1
-    leftChild = [1]
+    leftChild = [-1]
     rightChild = [-1]
     test(n, leftChild, rightChild, comment)
 
@@ -288,4 +337,10 @@ if __name__ == "__main__":
     n = 1
     leftChild = [0]
     rightChild = [-1]
+    test(n, leftChild, rightChild, comment)
+
+    comment = "root is 2; answer = True"
+    n = 3
+    leftChild = [-1,-1,1]
+    rightChild = [-1,-1,0]
     test(n, leftChild, rightChild, comment)
