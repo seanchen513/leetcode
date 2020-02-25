@@ -63,13 +63,16 @@ class Solution:
             rec_stack[v] = 0
             return False
 
+        # nodes/vertices are array indices 0, 1, ..., n-1
         visited = [0] * n
         rec_stack = [0] * n # recursion stack
         
+        # Build adjacency list.
         graph = {i: [] for i in range(n)}
         for x, y in prereqs:
             graph[x] += [y]
-        
+
+        # Loop over all vertices to make sure all components are visited.
         for v in graph: # or range(n)
             if not visited[v]:
                 if is_cyclic(v):
@@ -86,8 +89,8 @@ visited and recursion stack arrays.
 Can think of as 3 colors:
 
 0 = unvisited (WHITE)
-1 = visiting and in recursion stack (BLACK)
-2 = visited but not in recursion stack (GRAY)
+1 = visiting and in recursion stack (GREY)
+2 = visited but not in recursion stack (BLACK)
 """
 class Solution2:
     def canFinish(self, n: int, prereqs: List[List[int]]) -> bool:
@@ -106,12 +109,15 @@ class Solution2:
             visited[v] = 2 # BLACK state
             return False
 
-        visited = [0] * n # 0 = unvisited; WHITE states
+        # nodes/vertices are array indices 0, 1, ..., n-1
+        visited = [0] * n # 0 = unvisited; WHITE state
         
+        # Build adjacency list.
         graph = {i: [] for i in range(n)}
         for x, y in prereqs:
             graph[x] += [y]
 
+        # Loop over all vertices to make sure all components are visited.
         for v in graph: # or range(n)
             if not visited[v]:
                 if is_cyclic(v):
