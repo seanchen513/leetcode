@@ -81,13 +81,14 @@ class Solution:
                 return mid
             
             if arr[left] <= arr[mid]: # subarray from left to mid is sorted
-                if arr[left] <= target <= arr[mid]:
+                if arr[left] <= target < arr[mid]:
                     right = mid - 1
                 else:
                     left = mid + 1
             
             else: # arr[mid] <= arr[right], subarray from mid to right is sorted
-                if arr[mid + 1] <= target <= arr[right]:
+                #if arr[mid + 1] <= target <= arr[right]:
+                if arr[mid] < target <= arr[right]:
                     left = mid + 1
                 else:
                     right = mid - 1
@@ -111,13 +112,14 @@ class Solution2:
                 return mid
             
             if arr[left] <= arr[mid]:
-                if arr[left] <= target <= arr[mid]:
+                if arr[left] <= target < arr[mid]:
                     return bsearch(left, mid - 1)
                 else:
                     return bsearch(mid + 1, right)
             
             else: # arr[mid] <= arr[right]
-                if arr[mid + 1] <= target <= arr[right]:
+                #if arr[mid + 1] <= target <= arr[right]:
+                if arr[mid] < target <= arr[right]:
                     return bsearch(mid + 1, right)
                 else:
                     return bsearch(left, mid - 1)
@@ -186,7 +188,7 @@ class Solution3:
                 return mid
             elif arr[mid] < target:
                 lo = mid + 1
-            else:
+            else: # arr[mid] > target
                 hi = mid - 1
 
         # target not found
@@ -228,7 +230,7 @@ class Solution4:
         lo = 0
         hi = n - 1
 
-        # Usual binary search on sorted array.
+        # Do usual binary search on sorted array.
         while lo <= hi:
             mid = lo + (hi - lo) // 2
 
@@ -239,7 +241,7 @@ class Solution4:
                 return real_mid
             elif arr[real_mid] < target:
                 lo = mid + 1
-            else:
+            else: # arr[real_mid] > target
                 hi = mid - 1
 
         # target not found
