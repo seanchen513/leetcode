@@ -115,7 +115,10 @@ Other variations involving comparing arr[mid] to arr[mid-1].
 
 ###############################################################################
 """
-Solution 2: binary search comparing arr[mid-1], arr[mid], and arr[mid+1].
+Solution 2: binary search using "while lo <= hi" and comparing arr[mid-1], 
+arr[mid], and arr[mid+1].  Because of this, we need to check cases at the
+start for when n <= 2.
+
 Early return if peak index found.
 
 O(log n) time
