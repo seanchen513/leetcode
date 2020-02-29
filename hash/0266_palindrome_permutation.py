@@ -73,13 +73,12 @@ class Solution2:
 ###############################################################################
 
 if __name__ == "__main__":
-    def test(s, t, comment=None):
+    def test(s, comment=None):
         print("="*80)
         if comment:
             print(comment)
 
         print(f"\ns = {s}")
-        print(f"t = {t}")
         
         res = sol.canPermutePalindrome(s)
 
