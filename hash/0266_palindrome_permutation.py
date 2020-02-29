@@ -45,8 +45,22 @@ class Solution:
 
         if len(s) % 2 == 0:
             return all(count % 2 == 0 for count in d.values())
-        else:
-            return sum(count % 2 for count in d.values()) == 1
+        else:        
+            odd_count = 0
+
+            for count in d.values():
+                if count % 2:
+                    odd_count += 1
+                if odd_count > 1:
+                    return False
+            
+            if odd_count == 0:
+                return False
+
+            return True
+
+            ### This works, but doesn't return early if sum > 1.
+            #return sum(count % 2 for count in d.values()) == 1
 
         ### This works, but doesn't exit early when len(s) is even.
         #return len(s) % 2 == sum(count % 2 for count in d.values())
