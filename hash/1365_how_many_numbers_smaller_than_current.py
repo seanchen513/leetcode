@@ -37,6 +37,7 @@ Constraints:
 from typing import List
 import collections
 import bisect
+import itertools
 
 ###############################################################################
 """
@@ -58,8 +59,8 @@ class Solution:
         #     count[x] += 1
 
         for i in range(1,101):
-            count[i] += count[i-1]
-        
+          count[i] += count[i-1]
+
         return [count[x-1] for x in arr]
 
 """
@@ -68,19 +69,40 @@ Solution b: same as sol 1, but use "count" array instead of dict.
 class Solution1b:
     def smallerNumbersThanCurrent(self, arr: List[int]) -> List[int]:
         res = [0] * len(arr)
-        
         count = [0] * 101 # 0 <= arr[i] <= 100
         
-        for i, x in enumerate(arr):
+        for x in arr:
             count[x] += 1
 
-        for i in range(1,101):
+        for i in range(1, 101):
             count[i] += count[i-1]
-
+                
         for i, x in enumerate(arr):
             res[i] = count[x - 1] if x else 0
 
         return res
+
+"""
+Solution 1c: same as sol 1b, using "count" array, but also use
+itertools.accumulate().
+"""
+class Solution1c:
+    def smallerNumbersThanCurrent(self, arr: List[int]) -> List[int]:
+        count = [0] * 101 # 0 <= arr[i] <= 100
+        
+        for x in arr:
+            count[x] += 1
+
+        # use [0] as placeholder so we don't have to use "count[x] if x else 0"
+        # and also don't have to use "count[x-1]".
+        count = [0] + list(itertools.accumulate(count))
+        
+        # for i, x in enumerate(arr):
+        #     res[i] = count[x]
+
+        # return res
+        
+        return [count[x] for x in arr]
 
 ###############################################################################
 """
@@ -188,7 +210,6 @@ class Solution4b:
     def smallerNumbersThanCurrent(self, arr: List[int]) -> List[int]:
         return [sum(y < x for y in arr) for x in arr]
 
-
 ###############################################################################
 
 if __name__ == "__main__":   
@@ -206,7 +227,8 @@ if __name__ == "__main__":
 
     sol = Solution() # use dict for running count
     #sol = Solution1b() # use array for running count
-
+    #sol = Solution1c() # using "count" array, but also use itertools.accumulate().
+    
     #sol = Solution2() # use sorting and dict.setdefault()
     #sol = Solution2b()
 
@@ -228,3 +250,6 @@ if __name__ == "__main__":
     arr = [7,7,7,7]
     test(arr, comment)
     
+    comment = "LC test case; answer = [2,0,4,0,4,3]"
+    arr = [5,0,10,0,10,6]
+    test(arr, comment)
