@@ -15,11 +15,9 @@ Can be improved to O(log n) using union by rank or height.
 class SimpleUnionFind:
     def __init__(self, n):
         self.n = n # number of disjoint subsets
-        self.par = [0]*n
         
         # Initialize every element to be in its own singleton set.
-        for i in range(n): 
-            self.par[i] = i
+        self.par = [i for i in range(n)] # parent
 
     # No path compression, so O(n) time.  Iterative.
     def find(self, x):
@@ -28,9 +26,9 @@ class SimpleUnionFind:
 
         return x
     
-    def union(self, x, y):
-        px = self.par[x]
-        py = self.par[y]
+    def union(self, x, y): # aka, "connect"
+        px = self.find(x)
+        py = self.find(y)
 
         if px != py:
             self.par[px] = py
@@ -38,7 +36,7 @@ class SimpleUnionFind:
 
         return py # representative of the union
 
-    def same_subset(self, x, y):
+    def connected(self, x, y): # aka, "same_subset"
         return self.find(x) == self.find(y)
 
 ###############################################################################
@@ -50,11 +48,9 @@ If there are n elements in the set, assume the elements are the integers
 class UnionFind:
     def __init__(self, n):
         self.n = n # number of disjoint subsets
-        self.par = [0]*n
-        
+
         # Initialize every element to be in its own singleton set.
-        for i in range(n): 
-            self.par[i] = i
+        self.par = [i for i in range(n)] # parent
 
         self.rank = [0]*n
 
@@ -66,7 +62,7 @@ class UnionFind:
     the representative is assigned to be the parent of x and all elements that were 
     encountered along the way.
     """
-    def find(self, x):
+    def find(self, x): # aka, "rep"
         if self.par[x] == x: 
             return x
         
@@ -75,7 +71,7 @@ class UnionFind:
         return self.par[x]
 
     """
-    Iterative find() w/ path compression.
+    Iterative find() w/ path compression by halving.
     """
     def find2(self, x):
         while self.par[x] != x:
@@ -89,9 +85,9 @@ class UnionFind:
     Attach smaller rank tree to parent of higher rank tree.  If ranks are the
     same, then make one the parent and increment its rank by one.
     """
-    def union(self, x, y):
-        px = self.par[x]
-        py = self.par[y]
+    def union(self, x, y): # aka, "connect"
+        px = self.find(x)
+        py = self.find(y)
 
         if px == py:
             return px
@@ -107,9 +103,9 @@ class UnionFind:
         if self.rank[px] == self.rank[py]:
             self.rank[py] += 1
 
-        return px
+        return py
 
-    def same_subset(self, x, y):
+    def connected(self, x, y): # aka, "same_subset"
         return self.find(x) == self.find(y)
 
 ###############################################################################
