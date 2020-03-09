@@ -56,7 +56,7 @@ class Solution2:
 ###############################################################################
 
 if __name__ == "__main__":
-    def test(grid, comment=None):
+    def test(s, comment=None):
         print("="*80)
         if comment:
             print(comment)
