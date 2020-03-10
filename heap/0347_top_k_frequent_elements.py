@@ -97,14 +97,12 @@ O(n log k) time?
 """
 class Solution2b:
     def topKFrequent(self, arr: List[int], k: int) -> List[int]:
-        d = collections.Counter(arr)
-        k_most_common = d.most_common(k)
-
+        k_most_common = collections.Counter(arr).most_common(k)
         return [x for x, _ in k_most_common]
 
 ###############################################################################
 """
-Solution 3: no heap, no sorting, no Counter().
+Solution 3: bucket sort.  No heap, no sorting, no Counter().
 
 O(n) time?
 
@@ -129,12 +127,13 @@ res.extend(freq[times]) non-trival only for times = n
 """
 class Solution3:
     def topKFrequent(self, arr: List[int], k: int) -> List[int]:
-        d = collections.defaultdict(int)
+        # count = collections.Counter(arr)
+        count = collections.defaultdict(int)
         for x in arr:
-            d[x] += 1
+            count[x] += 1
         
-        freq = collections.defaultdict(list)
-        for x, cnt in d.items():
+        freq = collections.defaultdict(list) # buckets for counts
+        for x, cnt in count.items():
             freq[cnt].append(x)
 
         max_count = max(freq.keys())
@@ -149,27 +148,76 @@ class Solution3:
         
         #for times in range(len(arr), 0, -1):
         for times in range(max_count, 0, -1):
-            res.extend(freq[times]) 
-            if len(res) >= k:
-                return res[:k]
+            # res.extend( freq[times] ) 
+            # if len(res) >= k:
+            #     return res[:k]
+
+            for x in freq[times]:
+                res.append(x)
+                if len(res) == k:
+                    return res
 
         return res
 
 ###############################################################################
 """
-Solution 4: use quickselect.
+Solution 4: use quickselect w/ random pivots.
+
+O(n) time avg, O(n^2) worst case
+O(n) time worst case if added median-of-medians method to feed initial
+pivots into partition().  This also adds O(log n) extra space.
+
+O(n) extra space for "count" dict.
+
 """
+import random
 class Solution4:
     def topKFrequent(self, arr: List[int], k: int) -> List[int]:
-        pass
+        def partition(a, start, end):
+            pv = a[end] # pivot value
+            i = start # next pos to swap smaller-than-pivot elt to
 
-###############################################################################
-"""
-Solution 5: use bucket sort.
-"""
-class Solution5:
-    def topKFrequent(self, arr: List[int], k: int) -> List[int]:
-        pass
+            # Move all elements smaller than pivot to left of pivot.
+            for j in range(start, end):
+                if a[j] < pv:
+                    a[i], a[j] = a[j], a[i]
+                    i += 1
+
+            # Now, "i" is index of first elt >= pivot, ie, the first duplicate 
+            # of pivot, or the first elt larger than the pivot.
+
+            # Move pivot to its proper position.
+            a[i], a[end] = a[end], a[i]
+
+            return i # pivot value is now at index i
+
+        count = collections.defaultdict(int)
+        for x in arr:
+            count[x] += 1
+
+        a = [(-cnt, x) for x, cnt in count.items()] # -cnt so we get largest k elts
+
+        start, end = 0, len(a)-1
+        k -= 1 # given k is 1-based, but our algo is 0-based
+
+        while start <= end:
+            if start == end: # this part isn't necessary... both == k
+                a_k = a[:k+1]
+                return [x for _, x in a_k]
+
+            # Pick random initial pivot to feed into partition(), and swap to "end".
+            p = random.randint(start, end) # inclusive
+            a[p], a[end] = a[end], a[p]
+
+            p = partition(a, start, end) # pivot index
+
+            if p == k:
+                a_k = a[:k+1]
+                return [x for _, x in a_k]
+            elif p > k: # then we can ignore elts from p on since they are too big
+                end = p - 1
+            else: # p < k; we still need to find small elts to put b/w p and k
+                start = p + 1
 
 ###############################################################################
 
@@ -194,9 +242,8 @@ if __name__ == "__main__":
     sol = Solution2() # use heapq.nlargest()
     sol = Solution2b() # use Counter.most_common(k)
     
-    sol = Solution3() # no heap, no sorting, no Counter().
-    #sol = Solution4() # quickselect
-    #sol = Solution5() # bucket sort
+    sol = Solution3() # bucket sort; no heap, no sorting, no Counter()
+    sol = Solution4() # quickselect
 
     comment = "LC ex1; answer = [1,2]"
     arr = [1,1,1,2,2,3]
@@ -207,3 +254,14 @@ if __name__ == "__main__":
     arr = [1]
     k = 1
     test(arr, k, comment)
+
+    comment = "LC test case; answer = [1,2]"
+    arr = [1,2]
+    k = 2
+    test(arr, k, comment)
+
+    comment = "LC test case; answer = [1,3]"
+    arr = [5,3,1,1,1,3,73,1]
+    k = 2
+    test(arr, k, comment)
+
