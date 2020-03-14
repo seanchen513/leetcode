@@ -37,12 +37,11 @@ Memory Usage: 14.5 MB, less than 44.21% of Python3 online submissions
 class Solution:
     def maxArea(self, height: List[int]) -> int:
         n = len(height)
-
         left = 0
         right = n - 1
 
         ht = min(height[0], height[n-1])
-        mx = (n-1) * ht
+        mx = (n-1) * ht # max volume
 
         while left < right:
             if height[left] < height[right]:
@@ -64,28 +63,31 @@ class Solution:
         return mx
 
 """
-Solution 1b: more concise, but slower.  Increments left or right one step
-at a time, and recalculates and checks volume at each step.
+Solution 1b: more concise version of sol 1.
+For each side, move side inwards until strictly greater height is found,
+then check volume of new container.
 
 O(n) time
 O(1) extra space
 
-Runtime: 132 ms, faster than 63.52% of Python3 online submissions
-Memory Usage: 14.5 MB, less than 41.05% of Python3 online submissions
+Runtime: 120 ms, faster than 95.49% of Python3 online submissions
+Memory Usage: 14.6 MB, less than 12.63% of Python3 online submissions
 """
 class Solution1b:
     def maxArea(self, height: List[int]) -> int:
         n = len(height)
-        mx = 0
+        mx = 0 # max volume
         left = 0
         right = n - 1
 
         while left < right:
-            mx = max(mx, (right - left) * min(height[left], height[right]) )
+            h = min(height[left], height[right])
+            mx = max(mx, (right - left) * h)
 
-            if height[left] < height[right]:
+            while left < right and height[left] <= h:
                 left += 1
-            else:
+
+            while left < right and height[right] <= h:
                 right -= 1
 
         return mx
