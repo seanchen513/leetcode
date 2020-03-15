@@ -54,6 +54,9 @@ from typing import List
 ###############################################################################
 """
 Solution: use Python list as stack.
+
+O(1) time for push() and pop().
+O(k) time for increment(k, val).
 """
 class CustomStack:
     def __init__(self, maxSize: int):
