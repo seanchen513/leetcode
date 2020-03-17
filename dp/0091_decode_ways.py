@@ -130,6 +130,79 @@ class Solution1c:
         return res
 
 ###############################################################################
+"""
+Solution 2: recursion w/ memoization via @functools.lru_cache().
+
+O(n) time
+O(n) extra space: for cache and for recursion stack
+
+TLE w/o memoization
+"""
+import functools
+class Solution2:
+    def numDecodings(self, s: str) -> int:
+        @functools.lru_cache(None)
+        def rec(i):
+            if i >= n:
+                return 1
+
+            if s[i] == "0":
+                return 0
+
+            # at last char and it's not 0
+            if i == n - 1:
+                return 1
+
+            if int(s[i:i+2]) <= 26:
+                return rec(i+1) + rec(i+2)
+
+            return rec(i+1)
+
+        if s[0] == "0":
+            return 0
+
+        n = len(s)
+
+        return rec(0)
+
+"""
+Solution 2b: recursion w/ memoization.
+
+O(n) time
+O(n) extra space: for cache and for recursion stack
+"""
+class Solution2b:
+    def numDecodings(self, s: str) -> int:
+        def rec(i):
+            if i >= n:
+                return 1
+
+            if s[i] == "0":
+                return 0
+
+            # at last char and it's not 0
+            if i == n - 1:
+                return 1
+
+            if i in memo:
+                return memo[i]
+
+            memo[i] = rec(i+1)
+
+            if int(s[i:i+2]) <= 26:
+                memo[i] += rec(i+2)
+
+            return memo[i]
+
+        if s[0] == "0":
+            return 0
+
+        n = len(s)
+        memo = {}
+
+        return rec(0)
+
+###############################################################################
 
 if __name__ == "__main__":
     def test(s, comment=None):
@@ -144,7 +217,12 @@ if __name__ == "__main__":
         print(f"\nres = {res}\n")
 
 
+    sol = Solution() # tabulation
     sol = Solution()
+    sol = Solution()
+
+    sol = Solution2() # memoization via @functools.lru_cache()
+    sol = Solution2b() # memoization
 
     comment = "LC ex1; answer = 2"
     s = "12"
