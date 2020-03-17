@@ -218,8 +218,8 @@ if __name__ == "__main__":
 
 
     sol = Solution() # tabulation
-    sol = Solution()
-    sol = Solution()
+    sol = Solution1b()
+    sol = Solution1c()
 
     sol = Solution2() # memoization via @functools.lru_cache()
     sol = Solution2b() # memoization
