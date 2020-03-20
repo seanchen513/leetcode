@@ -44,7 +44,7 @@ import collections
 Solution 1: use dict to hold key/value pairs, and use doubly linked list to
 hold order of keys.
 
-Variations:
+Can do:
 - Can use dummy head and tail for linked list.
 - Linked list helper methods.
 
@@ -69,33 +69,40 @@ class LRUCache:
         self.tail = None
         self.capacity = capacity        
 
+    def __repr__(self):
+        arr = []
+        curr = self.head
+        while curr:
+            arr.append(str(curr.val))
+            curr = curr.next
+
+        return '->'.join(arr)
+
     def get(self, key: int) -> int:
-        if key in self.d:
-            val, node = self.d[key]
-            
-            ### Find key in self.keys linked list and move it to back.
-            
-            if self.tail == node:
-                return val
-
-            if self.head == node and node.next:
-                self.head = node.next
-            
-            # Remove node from doubly linked list.
-            temp = node.prev
-            if node.prev:
-                node.prev.next = node.next
-            if node.next:
-                node.next.prev = temp
-
-            # Add node to end of doubly linked list.
-            self.tail.next = node
-            node.prev = self.tail
-            self.tail = node
-
-            return val
-        else:
+        if key not in self.d:
             return -1
+
+        val, node = self.d[key]
+        
+        if self.tail == node:
+            return val
+
+        if self.head == node and node.next:
+            self.head = node.next
+        
+        # Remove node from doubly linked list.
+        temp = node.prev
+        if node.prev:
+            node.prev.next = node.next
+        if node.next:
+            node.next.prev = temp
+
+        # Add node to end of doubly linked list.
+        self.tail.next = node
+        node.prev = self.tail
+        self.tail = node
+
+        return val
 
     def put(self, key: int, value: int) -> None:
         if key in self.d:
@@ -122,6 +129,84 @@ class LRUCache:
 
         self.d[key] = [value, node]
 
+"""
+Solution 1b: same as sol 1, but use self as dummy head and tail of doubly
+linked list.
+"""
+class LRUCache1b:
+    def __init__(self, capacity: int): # Assume capacity > 0
+        self.d = {}
+        self.prev = self.next = self # self as dummy head and tail of DLL
+        self.capacity = capacity        
+
+    def __repr__(self):
+        arr = []
+        curr = self.next
+        while curr != self:
+            arr.append(str(curr.val))
+            curr = curr.next
+
+        return '->'.join(arr)
+
+    def get(self, key: int) -> int:
+        if key not in self.d:
+            return -1
+
+        val, node = self.d[key]
+
+        if self.prev != node: # if node isn't already tail of DLL
+            # Move node with key value to end of DLL.
+            self._remove(node)
+            self._add(node)
+
+        return val
+
+    def put(self, key: int, value: int) -> None:
+        if key in self.d:
+            _, node = self.d[key]
+
+            if self.prev != node: # if node isn't already tail of DLL
+                # Move node with key value to end of DLL.
+                self._remove(node)
+                self._add(node)
+
+            self.d[key][0] = value
+            return
+
+        if len(self.d) == self.capacity: # Assume > 0
+            node = self.next # first node of DLL
+            del self.d[node.val]
+            self._remove(node) # remove first node of DLL
+            node.val = key
+        else:        
+            node = ListNode(key)
+
+        self._add(node)
+        self.d[key] = [value, node]
+
+    """
+    Add given node to end of doubly linked list.
+
+    p - node - self
+    """
+    def _add(self, node):
+        p = self.prev
+        p.next = node
+        node.prev = p
+        node.next = self
+        self.prev = node
+
+    """
+    Remove given node from doubly linked list.
+
+    p - node - n
+    """
+    def _remove(self, node):
+        p = node.prev
+        n = node.next
+        p.next = n
+        n.prev = p
+
 ###############################################################################
 """
 Solution 2: use dict to hold key/value pairs, and use deque to hold order of
@@ -140,6 +225,9 @@ class LRUCache2:
         self.d = {}
         self.keys = collections.deque([])
         self.capacity = capacity        
+
+    def __repr__(self):
+        return '->'.join(map(str, self.keys))
 
     def get(self, key: int) -> int:
         if key in self.d:
@@ -174,6 +262,9 @@ class LRUCache3:
         self.d = collections.OrderedDict()
         self.capacity = capacity        
 
+    def __repr__(self):
+        return '->'.join(map(str, self.d))
+
     def get(self, key: int) -> int:
         if key in self.d:
             self.d.move_to_end(key)
@@ -200,6 +291,9 @@ class LRUCache3b(collections.OrderedDict):
     def __init__(self, capacity: int): # Assume capacity > 0
         self.capacity = capacity        
 
+    def __repr__(self):
+        return '->'.join(map(str, self))
+
     def get(self, key: int) -> int:
         if key in self:
             self.move_to_end(key)
@@ -218,47 +312,33 @@ class LRUCache3b(collections.OrderedDict):
 ###############################################################################
 
 if __name__ == "__main__":
-    def test(n, edges, t, target, comment=None):
-        print("="*80)
-        if comment:
-            print(comment)
-
-        print()
-        print(f"n = {n}")
-        print(edges)
-        print(f"t = {t}")
-        print(f"target = {target}")
-
-        res = sol.frogPosition(n, edges, t, target)
-
-        print(f"\nres = {res}\n")
-
-
-    comment = "LC example"
-    
     #cache = LRUCache(2) # use dict and doubly linked list
+    cache = LRUCache1b(2) # use dict and DLL; self of DLL is dummy head/tail
+    
     #cache = LRUCache2(2) # use dict and deque
     
     #cache = LRUCache3(2) # use collections.OrderedDict
-    cache = LRUCache3b(2) # inherit from OrderedDict
+    #cache = LRUCache3b(2) # inherit from OrderedDict
     
+    ### LC146 example
     cache.put(1, 10)
-    print(f"\nput(1,10): {cache.d}")
-
+    
+    print(f"\nput(1,10): {cache}") # Only shows keys in LRU order.
+    
     cache.put(2, 20)
-    print(f"\nput(2,20): {cache.d}")
+    print(f"\nput(2,20): {cache}")
 
     res = cache.get(1)
     print(f"get(1): {res} (expect 10)")
 
     cache.put(3, 30)
-    print(f"\nput(3,30): {cache.d}")
+    print(f"\nput(3,30): {cache}")
 
     res = cache.get(2)
     print(f"get(2): {res} (expect -1)")
 
     cache.put(4, 40)
-    print(f"\nput(4,40): {cache.d}")
+    print(f"\nput(4,40): {cache}")
 
     res = cache.get(1)
     print(f"get(1): {res} (expect -1)")
