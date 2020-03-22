@@ -60,13 +60,19 @@ O(n) extra space for output
 """
 class Solution:
     def createTargetArray(self, nums: List[int], index: List[int]) -> List[int]:
-        t = []
-        #t = collections.deque([])
+        res = []
+        #res = collections.deque([])
 
-        for i, idx in enumerate(index):
-            t.insert(idx, nums[i])
+        # for i in range(len(nums)):
+        #     res.insert(index[i], nums[i])
 
-        return t
+        # for i, idx in enumerate(index):
+        #     res.insert(idx, nums[i])
+
+        for i, v in zip(index, nums):
+           res.insert(i, v)
+
+        return res
 
 ###############################################################################
 """
@@ -110,7 +116,7 @@ if __name__ == "__main__":
 
 
     sol = Solution() # use list.insert()
-    sol = Solution2() # update "index" array first
+    #sol = Solution2() # update "index" array first
 
     comment = "LC ex1; answer = [0,4,1,3,2]"
     nums = [0,1,2,3,4]
