@@ -17,6 +17,8 @@ Output: 5
 Explanation: t is "aabbb" which its length is 5.
 """
 
+import collections
+
 ###############################################################################
 """
 Solution: use 2 pointers for sliding window of substring, and dict that maps
@@ -83,6 +85,48 @@ class Solution1b:
         return mx + 1
 
 ###############################################################################
+"""
+Solution 2: use 2 pointers for sliding window of substring, dict that counts
+chars in substring, and var to count distinct chars in substring.
+
+This solution generalizes better to k distinct chars since it doesn't rely
+on finding min(d.values()), which would make the overall time complexity O(nk).
+
+O(n) time
+O(1) extra space
+"""
+class Solution2:
+    def lengthOfLongestSubstringTwoDistinct(self, s: str) -> int:
+        d = collections.defaultdict(int)
+        start = 0
+        mx = -1 # so empty string returns 0
+        n = 0 # count of distinct chars in substring
+
+        for i, c in enumerate(s):
+            if d[c] == 0:
+                n += 1
+            
+            d[c] += 1
+
+            while n > 2:
+                d[s[start]] -= 1
+                
+                if d[s[start]] == 0:
+                    n -= 1
+
+                start += 1
+
+            if i - start > mx:
+                mx = i - start
+
+        return mx + 1
+
+###############################################################################
+"""
+Solution 3: use OrderedDict...
+"""
+
+###############################################################################
 
 if __name__ == "__main__":
     def test(s, comment=None):
@@ -97,8 +141,9 @@ if __name__ == "__main__":
 
         print(f"\nres = {res}\n")
 
-    sol = Solution() #
+    sol = Solution() # use dict that maps char to index last seen at
     #sol = Solution1b() #
+    sol = Solution2() # use dict that counts chars
 
     comment = "LC ex1; answer = 3"
     s = "eceba"
