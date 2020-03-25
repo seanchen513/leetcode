@@ -69,7 +69,7 @@ Solution b: same as sol 1, but use "count" array instead of dict.
 class Solution1b:
     def smallerNumbersThanCurrent(self, arr: List[int]) -> List[int]:
         res = [0] * len(arr)
-        count = [0] * 101 # 0 <= arr[i] <= 100
+        count = [0] * 101 # Assume 0 <= arr[i] <= 100
         
         for x in arr:
             count[x] += 1
@@ -106,16 +106,13 @@ class Solution1c:
 
 ###############################################################################
 """
-Solution 2: use sorting on given array, and dict.setdefault() on indices dict.
+Solution 2: sort array, and use dict.setdefault() on indices dict.
 
 setdefault(key[, default])
-If key is in the dictionary, return its value. If not, insert key with a value
+If key is in dict, return its value. If not, insert key with a value
 of default and return default. "default" defaults to None.
 
-Alternatively, build indices dict by setting indices[x] = i only the first 
-time that the value x is encountered.
-
-O(n log n) time
+O(n log n) time: for sorting.
 O(n) extra space for results
 O(n) extra space for sorted 
 
@@ -124,7 +121,7 @@ Memory Usage: 12.8 MB, less than 100.00% of Python3 online submissions
 """
 class Solution2:
     def smallerNumbersThanCurrent(self, arr: List[int]) -> List[int]:
-        indices = {}
+        indices = {} # maps each value to the first index it's seen
 
         for i, x in enumerate(sorted(arr)):
             indices.setdefault(x, i)
@@ -132,13 +129,27 @@ class Solution2:
         return [indices[x] for x in arr]
 
 """
-Solution 2b: use sorting on given array, and build indices dict by
-traversing sorted array in reverse.
+Solution 2b: sort array, and build indices dict by setting indices[x] = i
+only the first time that the value x is encountered.
 """
 class Solution2b:
     def smallerNumbersThanCurrent(self, arr: List[int]) -> List[int]:
+        indices = {} # maps each value to the first index it's seen
+
+        for i, x in enumerate(sorted(arr)):
+            if x not in indices:
+                indices[x] = i
+
+        return [indices[x] for x in arr]
+
+"""
+Solution 2c: sorting array, and build indices dict by traversing sorted
+array in reverse.
+"""
+class Solution2c:
+    def smallerNumbersThanCurrent(self, arr: List[int]) -> List[int]:
         s = sorted(arr)
-        indices = {}
+        indices = {} # maps each value to the first index it's seen
         
         #for i in range(len(s)-1, -1, -1):
         for i in reversed(range(len(s))):
@@ -181,7 +192,8 @@ Memory Usage: 12.8 MB, less than 100.00% of Python3 online submissions
 class Solution3b:
     def smallerNumbersThanCurrent(self, arr: List[int]) -> List[int]:
         s = sorted(arr)
-        return [bisect.bisect_left(s, x) for x in enumerate(arr)]
+
+        return [bisect.bisect_left(s, x) for x in arr]
         # return [s.index(x) for x in arr]
 
 ###############################################################################
@@ -229,10 +241,11 @@ if __name__ == "__main__":
     #sol = Solution1b() # use array for running count
     #sol = Solution1c() # using "count" array, but also use itertools.accumulate().
     
-    #sol = Solution2() # use sorting and dict.setdefault()
-    #sol = Solution2b()
+    #sol = Solution2() # sort array, build indices dict using dict.setdefault()
+    #sol = Solution2b() # sort array, build indices dict by setting...
+    sol = Solution2c() # sort array, build indices dict, traverse in reverse
 
-    #sol = Solution3() # use sorting and bisect_left()
+    #sol = Solution3() # sort array, and use bisect_left()
     #sol = Solution3b() # concise version
 
     #sol = Solution4() # brute force
