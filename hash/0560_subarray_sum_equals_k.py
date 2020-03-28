@@ -8,6 +8,7 @@ Example 1:
 
 Input:nums = [1,1,1], k = 2
 Output: 2
+
 Note:
 The length of the array is in range [1, 20,000].
 The range of numbers in the array is [-1000, 1000] and the range of the integer k is [-1e7, 1e7].
@@ -16,14 +17,64 @@ The range of numbers in the array is [-1000, 1000] and the range of the integer 
 from typing import List
 import collections
 
+###############################################################################
 """
-Solution: use runnings sums and track frequencies.
+Solution: use dict to count prefix sums seen so far.
 
-First, calculate running sums of array.
-Then loop through array of running sums.
-If current running sum is s[i], then we need another running sum s[j], j>=i, 
+O(n) time
+O(n) extra space: for dict
+"""
+class Solution:
+    def subarraySum(self, arr: List[int], k: int) -> int:
+        count = 0
+        s = 0 # prefix sum
+
+        d = collections.defaultdict(int)
+        d[0] = 1 # so prefix sums equal to k are counted
+
+        for x in arr:
+            s += x
+            
+            # curr_sum - prev_sum = s - (s - k) = k
+            count += d[s - k]
+            
+            # Be careful to only update dict after updating count.
+            d[s] += 1
+
+        return count
+
+"""
+Solution 1b: use dict to count wanted prefix sums.
+
+O(n) time
+O(n) extra space: for dict
+"""
+class Solution1b:
+    def subarraySum(self, arr: List[int], k: int) -> int:
+        count = 0
+        s = 0 # prefix sum
+
+        want = collections.defaultdict(int)
+        want[k] = 1 # so prefix sums equal to k are counted
+
+        for x in arr:
+            s += x
+            
+            count += want[s]
+
+            # If a future sum is k + s, then 
+            # future_sum - curr_sum = (k + s) - s = k.
+            # Be careful to only update dict after updating count.
+            want[k + s] += 1
+            
+        return count
+
+"""
+Solution 1c: use dict to count wanted prefix sums.
+
+If current prefix sum is s[j], then we need another prefix sum s[i], i < j, 
 so that s[j] - s[i] = arr[i+1] + ... + arr[j] = k.  Or s[j] = s[i] + k.
-We increment frequency counter for key s[i] + k in a dictionary "want".
+We increment count for key s[j] + k in a dictionary "want".
 This entry will be checked by future running sums.
 
 We check subarrays ending at the current index by incrementing the
@@ -33,23 +84,23 @@ that were looking for s[i] to help form k.
 O(n) time
 O(n) extra space: for dict
 """
-class Solution:
+class Solution1c:
     def subarraySum(self, arr: List[int], k: int) -> int:
         n = len(arr)
         count = 0
 
-        # Running sums starting at arr[0].
+        # Prefix sums: running sums starting at arr[0].
         # s[0] is reserved to be 0 so this identity holds:
         # s[j+1] - s[i] == arr[i] + ... + arr[j] for j >= i
-        s = [0]*(n+1)
+        s = [0] * (n+1)
 
-        # dict of frequencies.
-        # Key is desired running sum so that subtracting a previous running
-        # sum gives k. 
+        # dict of counts.
+        # Keys are desired prefix sums so that subtracting a previous 
+        # prefix sum gives k. 
         want = collections.defaultdict(int)
 
         for i in range(1, n+1):
-            s[i] = s[i-1] + arr[i-1] # calculate current running sum
+            s[i] = s[i-1] + arr[i-1]
             
             want[k + s[i]] += 1
 
@@ -59,7 +110,7 @@ class Solution:
 
 ###############################################################################
 """
-Solution2: use running sums
+Solution 2: brute force using prefix sums.
 
 O(n^2) time
 O(n) extra space
@@ -85,7 +136,7 @@ class Solution2:
 
 ###############################################################################
 """
-Solution3: brute force
+Solution 3: brute force
 
 O(n^2) time
 O(1) extra space
@@ -108,7 +159,7 @@ class Solution3:
 ###############################################################################
 
 if __name__ == "__main__":
-    def test(arr, k, comment=None):       
+    def test(arr, k, comment=None):
         print("="*80)
         if comment:
             print(comment)
@@ -116,13 +167,16 @@ if __name__ == "__main__":
         res = s.subarraySum(arr, k)
 
         print(f"\n{arr}")
-        print(f"\nk = {k}")
-        print(f"\nresult = {res}")
+        print(f"k = {k}")
+        print(f"\nresult = {res}\n")
 
 
-    s = Solution() # use running sums with dict of frequencies
-    s = Solution2() # use running sums
-    s = Solution3() # brute force
+    s = Solution() # use dict to count prefix sums seen so far
+    #s = Solution1b() # use dict to count wanted prefix sums
+    #s = Solution1c() # same, but use shifted prefix sum array as well
+
+    #s = Solution2() # brute force use prefix sums
+    #s = Solution3() # brute force
 
     comment = "LC example; answer = 2"    
     arr = [1,1,1]
@@ -137,4 +191,9 @@ if __name__ == "__main__":
     comment = "answer = 2: [2,3,4], [4,5]"
     arr = [1,2,3,4,5]
     k = 9
+    test(arr, k, comment)
+
+    comment = "answer = 0"
+    arr = [1]
+    k = 0
     test(arr, k, comment)
