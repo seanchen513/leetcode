@@ -44,12 +44,38 @@ class Solution:
         return count
 
 """
-Solution 1b: use dict to count wanted prefix sums.
+Solution 1b: same as sol 1, but instead of initializing d[0] = 1, we check
+if s == k in loop.
+"""
+class Solution1b:
+    def subarraySum(self, arr: List[int], k: int) -> int:
+        count = 0
+        s = 0 # prefix sum
+
+        d = collections.defaultdict(int)
+
+        for x in arr:
+            s += x
+            
+            if s == k:
+                count += 1
+
+            # curr_sum - prev_sum = s - (s - k) = k
+            count += d[s - k]
+            
+            # Be careful to only update dict after updating count.
+            d[s] += 1
+
+        return count
+
+###############################################################################
+"""
+Solution 2: use dict to count wanted prefix sums.
 
 O(n) time
 O(n) extra space: for dict
 """
-class Solution1b:
+class Solution2:
     def subarraySum(self, arr: List[int], k: int) -> int:
         count = 0
         s = 0 # prefix sum
@@ -70,7 +96,34 @@ class Solution1b:
         return count
 
 """
-Solution 1c: use dict to count wanted prefix sums.
+Solution 2b: same as sol 2, but instead of initializing want[k] = 1,
+we check if s == k in loop.
+"""
+class Solution2b:
+    def subarraySum(self, arr: List[int], k: int) -> int:
+        count = 0
+        s = 0 # prefix sum
+
+        want = collections.defaultdict(int)
+        #want[k] = 1 # so prefix sums equal to k are counted
+
+        for x in arr:
+            s += x
+            
+            if s == k:
+                count += 1
+
+            count += want[s]
+
+            # If a future sum is k + s, then 
+            # future_sum - curr_sum = (k + s) - s = k.
+            # Be careful to only update dict after updating count.
+            want[k + s] += 1
+            
+        return count
+
+"""
+Solution 2c: use dict to count wanted prefix sums.
 
 If current prefix sum is s[j], then we need another prefix sum s[i], i < j, 
 so that s[j] - s[i] = arr[i+1] + ... + arr[j] = k.  Or s[j] = s[i] + k.
@@ -84,7 +137,7 @@ that were looking for s[i] to help form k.
 O(n) time
 O(n) extra space: for dict
 """
-class Solution1c:
+class Solution2c:
     def subarraySum(self, arr: List[int], k: int) -> int:
         n = len(arr)
         count = 0
@@ -110,14 +163,14 @@ class Solution1c:
 
 ###############################################################################
 """
-Solution 2: brute force using prefix sums.
+Solution 3: brute force using prefix sums.
 
 O(n^2) time
 O(n) extra space
 
 TLE
 """
-class Solution2:
+class Solution3:
     def subarraySum(self, arr: List[int], k: int) -> int:
         n = len(arr)
         count = 0
@@ -136,12 +189,12 @@ class Solution2:
 
 ###############################################################################
 """
-Solution 3: brute force
+Solution 4: brute force
 
 O(n^2) time
 O(1) extra space
 """
-class Solution3:
+class Solution4:
     def subarraySum(self, arr: List[int], k: int) -> int:
         n = len(arr)
         count = 0
@@ -172,11 +225,14 @@ if __name__ == "__main__":
 
 
     s = Solution() # use dict to count prefix sums seen so far
-    #s = Solution1b() # use dict to count wanted prefix sums
-    #s = Solution1c() # same, but use shifted prefix sum array as well
+    s = Solution1b() # same but check if sum == k in loop
 
-    #s = Solution2() # brute force use prefix sums
-    #s = Solution3() # brute force
+    #s = Solution2() # use dict to count wanted prefix sums
+    #s = Solution2b() # same but check if sum == k in loop
+    #s = Solution2c() # same, but use shifted prefix sum array as well
+
+    #s = Solution3() # brute force use prefix sums
+    #s = Solution4() # brute force
 
     comment = "LC example; answer = 2"    
     arr = [1,1,1]
