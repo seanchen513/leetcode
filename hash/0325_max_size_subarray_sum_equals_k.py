@@ -41,6 +41,7 @@ Memory Usage: 16.8 MB, less than 20.00% of Python3 online submissions
 class Solution:
     def maxSubArrayLen(self, arr: List[int], k: int) -> int:
         s = 0 # prefix sum
+        mx = 0 # max  of subarrays with sum k
         d = {0: -1} # maps prefix sums to index
 
         for i in range(len(arr)):
@@ -51,6 +52,29 @@ class Solution:
 
             if s - k in d:
                 mx = max(mx, i - d[s - k])
+
+        return mx
+
+"""
+Solution 1b: same as sol 1, but instead of initializing d[0] = -1, we
+check if prefix sum == k in loop.
+"""
+class Solution1b:
+    def maxSubArrayLen(self, arr: List[int], k: int) -> int:
+        s = 0 # prefix sum
+        mx = 0 # max  of subarrays with sum k
+        d = {} # maps prefix sums to index
+
+        for i in range(len(arr)):
+            s += arr[i]
+
+            if s == k:
+                mx = i + 1
+            elif s - k in d:
+                mx = max(mx, i - d[s - k])
+
+            if s not in d:
+                d[s] = i
 
         return mx
 
@@ -123,7 +147,8 @@ if __name__ == "__main__":
 
 
     sol = Solution() # use dict that maps prefix sums to index
-    
+    sol = Solution1b() # same but check if prefix sum == k in loop
+
     #sol = Solution2() # brute force
     #sol = Solution2() # brute force using running sums
 
