@@ -58,7 +58,7 @@ class Solution:
 
 ###############################################################################
 """
-Solution: binary search on value space
+Solution: binary search with function f(k) = k*(k+1)//2.
 
 Triangular numbers
 1 3 6 10 15 21 28 36 45 55 66 78 91 105 ...
