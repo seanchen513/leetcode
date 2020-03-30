@@ -40,17 +40,16 @@ Note: solution works without early return by by simply letting hi = mid
 """
 class Solution:
     def findPeakElement(self, arr: List[int]) -> int:
-        n = len(arr)
         lo = 0
-        hi = n-1
+        hi = len(arr) - 1
 
         # At anytime, peak index can be anywhere from lo to hi.
 
         while lo < hi:
             mid = lo + (hi - lo) // 2
 
-            if arr[mid] > arr[mid+1]: # decreasing
-                if arr[mid] > arr[mid-1]:
+            if arr[mid] > arr[mid + 1]: # decreasing
+                if arr[mid] > arr[mid - 1]:
                     return mid
                 else: # decreasing from mid-1 to mid+1
                     # Check left side since it's increasing then decreasing
@@ -78,18 +77,17 @@ Solution 1b: same as sol 1, but no early return, so use "hi = mid".
 """
 class Solution1b:
     def findPeakElement(self, arr: List[int]) -> int:
-        n = len(arr)
         lo = 0
-        hi = n-1
+        hi = len(arr) - 1
 
         # At anytime, peak index can be anywhere from lo to hi.
 
         while lo < hi:
             mid = lo + (hi - lo) // 2
 
-            if arr[mid] > arr[mid+1]: # decreasing
+            if arr[mid] > arr[mid + 1]: # decreasing
                 # Check left side since it's increasing then decreasing
-                hi = mid # hi-1 might be peak index
+                hi = mid # hi - 1 might be peak index
             
             else: # increasing from mid to mid+1
                 # Check right side since it's increasing then decreasing
@@ -260,6 +258,23 @@ class Solution3b:
         return hi
 
 ###############################################################################
+"""
+Solution 4: linear scan.
+
+O(n) time
+O(1) extra space
+"""
+class Solution4:
+    def findPeakElement(self, arr: List[int]) -> int:
+        n = len(arr)
+
+        for i in range(n-1):
+            if arr[i] > arr[i+1]:
+                return i
+
+        return n-1
+
+###############################################################################
 
 if __name__ == "__main__":
     def test(arr, comment=None):
@@ -276,9 +291,13 @@ if __name__ == "__main__":
 
 
     sol = Solution() # bsearch for peak (early return); "while lo < hi"
+    sol = Solution1b() # same, but no early return
+
     #sol = Solution2() # bsearch for peak (early return); "while lo <= hi"
     #sol = Solution3() # bsearch "while lo <= hi"; check arr[mid] vs arr[mid+1]
     #sol = Solution3b() # bsearch "while lo <= hi"; check arr[mid] vs arr[mid-1]
+    
+    #sol = Solution4() # linear scan
 
     comment = "LC ex1; answer = 2"
     arr = [1,2,3,1]
