@@ -182,9 +182,7 @@ def reverse_ll(head: ListNode) -> (ListNode, ListNode):
 
     return lag, tail
 
-
 ###############################################################################
-
 """
 Used by ll_insertion_sort().
 Inserts node into sorted position in sorted linked list given by head.
@@ -207,7 +205,6 @@ def sorted_insert(head: ListNode, node: ListNode) -> ListNode:
 
     return head
 
-
 def ll_insertion_sort(head: ListNode) -> ListNode:
     sorted = None # head of sorted linked list that we will build
     curr = head
@@ -219,11 +216,7 @@ def ll_insertion_sort(head: ListNode) -> ListNode:
     
     return sorted
 
-
-
-
 ###############################################################################
-
 """
 Sorted merge of l1 and l2, each of which is sorted.
 Don't create a new list.
@@ -237,16 +230,15 @@ def merge_sorted(l1: ListNode, l2: ListNode) -> ListNode:
     while l1 and l2:
         if l1.val <= l2.val:
             curr.next = l1
-            curr = l1
             l1 = l1.next
         else:
             curr.next = l2
-            curr = l2
             l2 = l2.next
 
-        #curr = curr.next
+        curr = curr.next
 
-    curr.next = l1 if l1 else l2
+    #curr.next = l1 if l1 else l2
+    curr.next = l1 or l2
 
     return header.next
 
@@ -273,6 +265,19 @@ def merge_sorted_rec(l1: ListNode, l2: ListNode) -> ListNode:
 """
 Returns middle node (if odd number of nodes),
 or the *first* node of the two middle ones (if even number of nodes).
+
+Example:
+1 2 3 4 5 6
+s
+  f
+
+1 2 3 4 5 6
+  s
+      f  
+
+1 2 3 4 5 6
+    s
+          f  
 """
 def get_middle(head: ListNode) -> ListNode:
     if head is None:
@@ -287,11 +292,58 @@ def get_middle(head: ListNode) -> ListNode:
     
     return slow
 
+# Alternative
+def get_middle1b(head: ListNode) -> ListNode:
+    if head is None:
+        return head
+
+    slow = head # for readability; could use head directly instead
+    fast = head
+    pre = head
+
+    while fast and fast.next:
+        pre = slow
+        slow = slow.next
+        fast = fast.next.next
+    
+    return pre
+
+# Alternative
+def get_middle1c(head):
+    if head is None:
+        return head
+
+    slow = head
+    fast = head
+
+    while fast.next and fast.next.next:
+        slow = slow.next
+        fast = fast.next.next
+    
+    return slow
+
 """
 LC876 easy - Middle of the Linked List
 
 Returns middle node (if odd number of nodes),
 or the *second* node of the two middle ones (if even number of nodes).
+
+Example:
+1 2 3 4 5 6
+s
+f
+
+1 2 3 4 5 6
+  s
+    f  
+
+1 2 3 4 5 6
+    s
+        f  
+
+1 2 3 4 5 6 None
+      s
+            f  
 """
 def get_middle2(head: ListNode) -> ListNode:
     if head is None:
@@ -406,7 +458,3 @@ if __name__ == "__main__":
 
     # head = ll_insertion_sort(head)
     # print(head)
-
-
-
-
