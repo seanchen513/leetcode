@@ -168,14 +168,15 @@ if __name__ == "__main__":
         #tail.next = head
         
         res = sol.insert(head, x)
-        print(f"\nres.val = {res.val}")
+        print(f"\nreturned head val = {res.val}\n")
 
-        #print(f"\n{res}\n")
         print_circular_ll(res)
         print('\n')
 
 
     sol = Solution()
+    sol = Solution2()
+    sol = Solution3()
     
     comment = "LC ex1"
     arr = [3,4,1]
