@@ -28,8 +28,9 @@ from linked_list import ListNode, build_ll
 
 ###############################################################################
 """
-Solution: use 2 pointers, node and cur, which scouts ahead for next node
-that is not equal in value to node.
+Solution: use 2 pointers:
+node = last node found with no dups; acts as anchor
+cur = scouts ahead for next node that is not equal in value to node
 
 O(n) time
 O(1) extra space
@@ -38,8 +39,9 @@ class Solution:
     def deleteDuplicates(self, head: ListNode) -> ListNode:       
         node = head
 
-        while node:
-            cur = node.next
+        while node: # last node found with no dups; acts as anchor
+            cur = node.next # first node after "node" to check for dups
+            # scout ahead for first node not equal in value to "node"
             while cur and cur.val == node.val:
                 cur = cur.next
 
