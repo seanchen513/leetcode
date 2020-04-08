@@ -44,12 +44,12 @@ class Solution:
 
         stack = [] # mono decreasing stack
 
-        for i, x in enumerate(temps):
-            while stack and stack[-1][0] < x:
+        for i, t in enumerate(temps):
+            while stack and stack[-1][0] < t:
                 _, k = stack.pop()
                 res[k] = i - k
 
-            stack.append((x, i))
+            stack.append((t, i))
 
         return res
 
@@ -66,8 +66,8 @@ class Solution1b:
 
         stack = [] # mono decreasing stack
 
-        for i in range(n):
-            while stack and temps[stack[-1]] < temps[i]:
+        for i, t in enumerate(temps):
+            while stack and temps[stack[-1]] < t:
                 k = stack.pop()
                 res[k] = i - k
 
