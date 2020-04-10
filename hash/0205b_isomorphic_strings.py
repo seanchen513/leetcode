@@ -22,7 +22,7 @@ O(mn) extra space
 """
 def group_iso(strs):
     # Each letter is encoded as the order it appears in "s".
-    # Eg, first unique letter is encoded as 0, second unique letter as 1, etc.
+    # Eg, first unique letter is encoded as 0, second unique lgoetter as 1, etc.
     # encode() is O(n) time
     def encode(s):
         d = {}
