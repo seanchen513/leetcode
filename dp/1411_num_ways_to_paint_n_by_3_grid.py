@@ -41,6 +41,9 @@ grid[i].length == 3
 1 <= n <= 5000
 """
 
+import collections
+import itertools
+
 ###############################################################################
 """
 Solution: tabulation using 2 vars: the number of ways to paint the current
@@ -88,6 +91,8 @@ First row: 12 ways
 2 colors: 6
 3 colors: 6
 
+Runtime: 44 ms, faster than 97.35% of Python3 online submissions
+Memory Usage: 13.7 MB, less than 100.00% of Python3 online submissions
 """
 class Solution:
     def numOfWays(self, n: int) -> int:
@@ -109,16 +114,291 @@ c2 = 3*c2 + 2*c3 = 2*c + c2
 
 c = 4*c + c2
 c2 = 2*c + c2
+
+Runtime: 40 ms, faster than 98.63% of Python3 online submissions
+Memory Usage: 13.7 MB, less than 100.00% of Python3 online submissions
 """
 class Solution1b:
     def numOfWays(self, n: int) -> int:
         c, c2 = 12, 6
+        mod = 10**9 + 7
 
-        #for _ in range(2, n+1):
         for _ in range(1, n):
-            c, c2 = 4*c + c2, 2*c + c2
+            c, c2 = (4*c + c2) % mod, (2*c + c2) % mod
 
-        return c % (10**9 + 7)
+        return c % mod
+
+###############################################################################
+"""
+Solution 2: DP tabulation. Count each possible combination of colors explicitly.
+
+dp[row n][coloring] = number of ways to color grid up to row n so that 
+row n has given coloring.
+
+Precalculate the possible colorings for a row given the coloring of the 
+previous row. This is a symmetric relation.
+
+Runtime: 600 ms, faster than 26.10% of Python3 online submissions
+Memory Usage: 18.7 MB, less than 100.00% of Python3 online submissions
+"""
+class Solution2:
+    def numOfWays(self, n: int) -> int:
+        colors = [1, 2, 3]
+        m = 3 # number of cells per row of grid
+        mod = 10**9 + 7
+
+        """ Create list of all possible colorings of a row of size m. """
+        combos = []
+        for p in itertools.product(colors, repeat=m):
+            if all(x != y for x, y in zip(p, p[1:])):
+            #if all(p[i] != p[i-1] for i in range(1, m)):
+                combos.append(p)
+
+        """
+        Precalculate possible colorings for a row given the coloring
+        of the previous row. This is a symmetric relation.
+        """
+        poss = collections.defaultdict(set)
+        for p0 in combos:
+            # for p in combos:
+            #     if all(p[i] != p0[i] for i in range(m)):
+            #         poss[p].add(p0)
+
+            #poss[p0] = {p for p in combos if all(p[i] != p0[i] for i in range(m))}
+            poss[p0] = {p for p in combos if all(x != x0 for x, x0 in zip(p, p0))}
+
+        """ Row index starts at 0. """
+        dp = [{p: 0 for p in combos} for _ in range(n)]
+        dp[0] = {p: 1 for p in combos}
+
+        # for row in range(1, n):
+        #     for p0, cnt in dp[row-1].items():
+        #         for p in poss[p0]:
+        #             dp[row][p] += cnt % mod
+
+        for row in range(1, n):
+            dp0 = dp[row-1]
+
+            for p in combos:
+                dp[row][p] = sum(dp0[p0] for p0 in poss[p]) % mod
+
+        return sum(dp[-1].values()) % mod
+
+"""
+Solution 2b: same, but only keep track of previous and current row.
+
+Runtime: 628 ms, faster than 25.91% of Python3 online submissions
+Memory Usage: 13.9 MB, less than 100.00% of Python3 online submissions
+
+If use this expression: dp[p] = sum(dp0[p0] for p0 in poss[p]) % mod
+Runtime: 544 ms, faster than 26.40% of Python3 online submissions
+Memory Usage: 14 MB, less than 100.00% of Python3 online submissions
+"""
+class Solution2b:
+    def numOfWays(self, n: int) -> int:
+        colors = [1, 2, 3]
+        m = 3 # number of cells per row of grid
+        mod = 10**9 + 7
+
+        """ Create list of all possible colorings of a row of size m. """
+        combos = []
+        for p in itertools.product(colors, repeat=m):
+            if all(x != y for x, y in zip(p, p[1:])):
+            #if all(p[i] != p[i-1] for i in range(1, m)):
+                combos.append(p)
+
+        """
+        Precalculate possible colorings for a row given the coloring
+        of the previous row. This is a symmetric relation.
+        """
+        poss = collections.defaultdict(set)
+        for p0 in combos:
+            # for p in combos:
+            #     if all(p[i] != p0[i] for i in range(m)):
+            #         poss[p].add(p0)
+
+            #poss[p0] = {p for p in combos if all(p[i] != p0[i] for i in range(m))}
+            poss[p0] = {p for p in combos if all(x != x0 for x, x0 in zip(p, p0))}
+
+        """ Counts for first row. """
+        dp = {p: 1 for p in combos}
+
+        # for _ in range(1, n):
+        #     dp0 = dp
+
+        #     # dp.collections.Counter() # SLOW
+        #     # dp = collections.defaultdict(int) # a bit slow
+        #     dp = {p: 0 for p in combos} # fastest
+
+        #     for p0, cnt in dp0.items():
+        #         for p in poss[p0]:
+        #             dp[p] += cnt % mod
+
+        for _ in range(1, n):
+            dp0 = dp
+            dp = {}
+        
+            for p in combos:
+                #dp[p] = sum(dp0[p0] % mod for p0 in poss[p]) % mod
+                dp[p] = sum(dp0[p0] for p0 in poss[p]) % mod # faster
+
+        return sum(dp.values()) % mod
+
+"""
+Solution 2c: don't precalculate to see how much slower it is.
+
+Runtime: 5164 ms, faster than 5.99% of Python3 online submissions
+Memory Usage: 19.3 MB, less than 100.00% of Python3 online submissions
+"""
+class Solution2c:
+    def numOfWays(self, n: int) -> int:
+        colors = [1, 2, 3]
+        m = 3 # number of cells per row of grid
+        mod = 10**9 + 7
+
+        """ Create list of all possible colorings of a row of size m. """
+        combos = []
+        for p in itertools.product(colors, repeat=m):
+            if all(x != y for x, y in zip(p, p[1:])):
+            #if all(p[i] != p[i-1] for i in range(1, m)):
+                combos.append(p)
+
+        """ Row index starts at 0. """
+        dp = [{p: 0 for p in combos} for _ in range(n)]
+        dp[0] = {p: 1 for p in combos}
+
+        for row in range(1, n):
+            for p0, cnt in dp[row-1].items():
+                for p in combos:
+                    #if all(p[col] != p0[col] for col in range(m)):
+                    if all(x != x0 for x, x0 in zip(p, p0)):
+                        dp[row][p] += cnt % mod
+
+        return sum(dp[-1].values()) % mod
+
+###############################################################################
+"""
+Solution 3: use matrix exponentiation.
+
+O(log n) time
+O() extra space
+
+###
+
+c2 = 3 2 * c2
+c3   2 2   c3
+
+c(i+1) = A * c(i)
+c(i+2) = A^2 c(i)
+
+c(1) = (6, 6)
+c(2) = A * c(1)
+c(3) = A^2 * c(1)
+c(5) = A^4 * c(1)
+c(9) = A^8 * c(1)
+
+A = [[a,b], [c,d]]
+A^2 =  [[aa+bc, b(a+d)], [c(a+d), bc+dd]]
+
+17 = 16 + 1 = 0b1_0001
+17->16: A
+16->8: A + A^2
+8: A^4
+4: A^8
+2: A16
+
+*** Passes on LC, but locally doesn't give the correct answer for:
+n = 5000
+answer = 30228214
+
+Runtime: 80 ms, faster than 73.60% of Python3 online submissions
+Memory Usage: 29.3 MB, less than 100.00% of Python3 online submissions
+"""
+class Solution3:
+    def numOfWays(self, n: int) -> int:
+        import numpy as np
+       
+        A = np.matrix([[3,2], [2,2]])
+        res = [6, 6]
+        
+        n -= 1
+        mod = 10**9 + 7
+
+        while n:
+            if n & 1:
+                res = (res * A) % mod
+
+            A = (A * A) % mod
+            n //= 2
+
+        return np.sum(res) % mod
+
+"""
+Solution 3b: use np.linalg.matrix_power().
+
+Overflows since we don't take intermediate modulos.
+
+*** Does not give the correct answer for:
+n = 5000
+answer = 30228214
+"""
+class Solution3b:
+    def numOfWays(self, n: int) -> int:
+        import numpy as np
+        from numpy.linalg import matrix_power
+
+        res = [6, 6]
+        
+        #A = np.matrix([[3,2], [2,2]])
+        A = np.matrix('3 2; 2 2')
+
+        A = matrix_power(A, n-1)
+
+        #return np.sum(np.matmul(A, res)) % (10**9 + 7)
+        #return np.sum(np.matmul(res, A)) % (10**9 + 7)
+        return np.sum(res @ A) % (10**9 + 7)
+
+"""
+Solution 3c:
+
+*** doesn't give correct answer for n = 7...
+*** NEED TO FIX
+
+"""
+class Solution3c:
+    def numOfWays(self, n: int) -> int:
+        def sq(a, b, c, d):
+            return a*a+b*c, b*(a+d), c*(a+d), b*c+d*d
+
+        #def power(n, a, b, c, d):
+        def power(n):
+            if n == 1:
+                return a, b, c, d
+
+            if n % 2 == 1: #if n & 1:
+                #x, y, z, w = power(n-1, a, b, c, d)
+                x, y, z, w = power(n-1)
+                return a + x, b + y, c + z, d + w
+
+            #x, y, z, w = power(n//2, a, b, c, d)
+            x, y, z, w = power(n//2)
+
+            return sq(x, y, z, w)
+            #return x*x+y*z, y*(x+w), z*(x+w), y*z+w*w
+
+        c2, c3 = 6, 6
+
+        if n == 1:
+            return c2 + c3
+
+        a, b, c, d = 3, 2, 2, 2
+
+        #a, b, c, d = power(n-1, 3, 2, 2, 2)
+        a, b, c, d = power(n-1)
+
+        c2, c3 = a * c2 + b * c3, c * c2 + d * c3
+
+        return (c2 + c3) % (10**9 + 7)
 
 ###############################################################################
 
@@ -135,8 +415,16 @@ if __name__ == "__main__":
         print(f"\nres = {res}\n")
 
 
-    sol = Solution()
-    sol = Solution1b()
+    sol = Solution() # count w/ c2 and c3
+    sol = Solution1b() # count w/ c and c2
+
+    sol = Solution2() # DP tabulation; enumerate and count 
+    #sol = Solution2b() # same, but track only previous and current row
+    #sol = Solution2c() # same, but don't precalculate compatible colorings
+
+    #sol = Solution3() # matrix exponentiation w/ mod
+    #sol = Solution3b() # use np.linalg.matrix_power(); overflows
+    #sol = Solution3c() # 
 
     comment = "LC ex1; answer = 12"
     n = 1
