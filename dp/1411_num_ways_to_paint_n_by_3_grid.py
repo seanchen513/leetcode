@@ -128,6 +128,86 @@ class Solution1b:
 
         return c % mod
 
+"""
+Solution 1c: generalize for number of cells per row and number of colors.
+
+Runtime: 104 ms, faster than 57.51% of Python3 online submissions
+Memory Usage: 13.9 MB, less than 100.00% of Python3 online submissions
+"""
+class Solution1c:
+    def numOfWays(self, n: int) -> int:
+        colors = list(range(3))
+        m = 3 # number of cells per row of grid
+        mod = 10**9 + 7
+
+        """ Create list of all possible colorings of a row of size m. """
+        combos = []
+        for p in itertools.product(colors, repeat=m):
+            if all(x != y for x, y in zip(p, p[1:])):
+                combos.append(p)
+        
+        """
+        Map each coloring to an index (number of colors it uses minus 2).
+        Each row can be colored with anywhere from 2 to min(m, len(colors)) 
+        colors. We're limited by the number of cells in a row and by the
+        number of colors available to use.
+        These map to indices 0 through min(m-2, len(colors)-2).
+        There are min(m, len(colors)) - 1 possible number of colors in a
+        coloring of a row. This number is 2 for the LC problem.
+        """
+        ncc = min(m, len(colors)) - 1
+        index = {p: len(set(p)) - 2 for p in combos}
+
+        """
+        index = num colors used - 2
+        value = number of colorings that use that many colors
+
+        eg, when colors = [1,2,3] and m = 3:
+        c[0] = c2 = 6 # 6 colorings use 2 colors
+        c[1] = c3 = 6 # 6 colorings use 3 colors
+        """
+        c = [0] * ncc
+
+        for p in combos:
+            c[index[p]] += 1
+
+        """
+        Calculate the transition matrix.
+        This counts the number of ways to transition from a representative 
+        coloring with i0+2 colors to any coloring with i+2 colors.
+        If num colors are 2...m, then indices are 0..m-2
+        """
+        d = [[0] * ncc for _ in range(ncc)]
+        
+        for p0 in combos: # old coloring
+            i0 = index[p0] # index for coloring p0
+
+            # Only do the calculation for one reprensentative coloring
+            # for each number of colorings.
+            if any(d[i0][j] != 0 for j in range(ncc)):
+                continue
+
+            for p in combos: # new coloring
+                if all(x != x0 for x, x0 in zip(p, p0)): # if colorings compatible
+                    d[i0][index[p]] += 1
+
+        """
+        Do the actual DP tabulation calculations.
+        """
+        for _ in range(1, n): # current row number, 0-based index
+            c0 = c # counts for previous row
+            c = [0] * ncc # counts for current row
+
+            for i in range(ncc):
+                for i0 in range(ncc):
+                    c[i] += (d[i0][i] * c0[i0]) % mod
+
+                #c[i] = sum((d[i0][i] * c0[i0]) % mod for i0 in range(ncc)) % mod
+
+        #print(f"\nc = {c}")
+
+        return sum(c) % mod
+
 ###############################################################################
 """
 Solution 2: DP tabulation. Count each possible combination of colors explicitly.
@@ -400,6 +480,87 @@ class Solution3c:
 
         return (c2 + c3) % (10**9 + 7)
 
+"""
+Solution 3d: generalize for number of cells per row and number of colors.
+
+Runtime: 80 ms, faster than 73.60% of Python3 online submissions
+Memory Usage: 29.5 MB, less than 100.00% of Python3 online submissions
+"""
+class Solution3d:
+    def numOfWays(self, n: int) -> int:
+        colors = list(range(3))
+        m = 3 # number of cells per row of grid
+
+        """ Create list of all possible colorings of a row of size m. """
+        combos = []
+        for p in itertools.product(colors, repeat=m):
+            if all(x != y for x, y in zip(p, p[1:])):
+                combos.append(p)
+        
+        """
+        Map each coloring to an index (number of colors it uses minus 2).
+        Each row can be colored with anywhere from 2 to min(m, len(colors)) 
+        colors. We're limited by the number of cells in a row and by the
+        number of colors available to use.
+        These map to indices 0 through min(m-2, len(colors)-2).
+        There are min(m, len(colors)) - 1 possible number of colors in a
+        coloring of a row. This number is 2 for the LC problem.
+        """
+        ncc = min(m, len(colors)) - 1
+        index = {p: len(set(p)) - 2 for p in combos}
+
+        """
+        index = num colors used - 2
+        value = number of colorings that use that many colors
+
+        eg, when colors = [1,2,3] and m = 3:
+        c[0] = c2 = 6 # 6 colorings use 2 colors
+        c[1] = c3 = 6 # 6 colorings use 3 colors
+        """
+        c = [0] * ncc
+
+        for p in combos:
+            c[index[p]] += 1
+
+        """
+        Calculate the transition matrix.
+        This counts the number of ways to transition from a representative 
+        coloring with i0+2 colors to any coloring with i+2 colors.
+        If num colors are 2...m, then indices are 0..m-2
+        """
+        d = [[0] * ncc for _ in range(ncc)]
+        
+        for p0 in combos: # old coloring
+            i0 = index[p0] # index for coloring p0
+
+            # Only do the calculation for one reprensentative coloring
+            # for each number of colorings.
+            if any(d[i0][j] != 0 for j in range(ncc)):
+                continue
+
+            for p in combos: # new coloring
+                if all(x != x0 for x, x0 in zip(p, p0)): # if colorings compatible
+                    d[i0][index[p]] += 1
+
+        """
+        Solve the problem using matrix exponentation.
+        """
+        import numpy as np
+       
+        A = np.matrix(d)
+                
+        n -= 1
+        mod = 10**9 + 7
+
+        while n:
+            if n & 1:
+                c = (c * A) % mod
+
+            A = (A * A) % mod
+            n //= 2
+
+        return np.sum(c) % mod
+
 ###############################################################################
 
 if __name__ == "__main__":
@@ -417,20 +578,24 @@ if __name__ == "__main__":
 
     sol = Solution() # count w/ c2 and c3
     sol = Solution1b() # count w/ c and c2
+    sol = Solution1c() # general solution
 
-    sol = Solution2() # DP tabulation; enumerate and count 
+    #sol = Solution2() # DP tabulation; enumerate and count 
     #sol = Solution2b() # same, but track only previous and current row
     #sol = Solution2c() # same, but don't precalculate compatible colorings
 
     #sol = Solution3() # matrix exponentiation w/ mod
     #sol = Solution3b() # use np.linalg.matrix_power(); overflows
-    #sol = Solution3c() # 
+    #sol = Solution3c() # doesn't work
+    sol = Solution3d() # general solution
 
-    comment = "LC ex1; answer = 12"
+    comment = ("LC ex1: answer = 12\n"
+        "g4g: test case for 3 cells per row and 4 colors; answer = 36")
     n = 1
     test(n, comment)
 
-    comment = "LC ex2; answer = 54"
+    comment = ("LC ex1: answer = 54\n"
+        "g4g: test case for 3 cells per row and 4 colors; answer = 588")
     n = 2
     test(n, comment)
 
@@ -445,4 +610,13 @@ if __name__ == "__main__":
     comment = "LC ex5; answer = 30228214"
     n = 5000
     test(n, comment)
-    
+
+    comment = ("LC: answer = \n"
+        "g4g: test case for 3 cells per row and 4 colors; answer = 178599516")
+    n = 500
+    test(n, comment)
+
+    comment = ("LC: answer = \n"
+        "g4g: test case for 3 cells per row and 4 colors; answer = 540460643")
+    n = 10000
+    test(n, comment)
