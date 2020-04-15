@@ -39,8 +39,8 @@ import collections
 """
 Solution: brute force
 
-O(n^2) time
-O(n) extra space: for output
+O(n^2 * s) time, where n = num strings, and s = max length of any word
+O(n * s) extra space: for output
 """
 class Solution:
     def stringMatching(self, words: List[str]) -> List[str]:
@@ -59,7 +59,7 @@ class Solution:
 
 ###############################################################################
 """
-Solution: functional.
+Solution 2: functional.
 """
 class Solution2:
     def stringMatching(self, words: List[str]) -> List[str]:
@@ -69,6 +69,52 @@ class Solution2:
         return [w for w in words if f(w)]
 
         #return list(filter(lambda w: any(w2 != w and w2.find(w) != -1 for w2 in words), words))
+
+###############################################################################
+"""
+Solution 3: use suffix trie
+
+https://leetcode.com/problems/string-matching-in-an-array/discuss/575147/Clean-Python-3-suffix-trie-O(NlogN-%2B-N-*-S2)
+
+O(n log n + n * s^2) time, where n = num strings, and s = max length of any word
+
+This is better than brute force's O(n^2 s) if n >> s.
+
+O(n * s^2) space: for suffix trie
+O(n * s) space: for output
+"""
+class Solution3:
+    def stringMatching(self, words: List[str]) -> List[str]:
+        def add(word):
+            node = trie
+            for c in word:
+                #node = node.setdefault(c, {})
+                if c not in node:
+                    node[c] = {}
+                node = node[c]
+
+        def get(word) -> bool:
+            node = trie
+            for c in word:
+                #if (node := node.get(c)) is None:
+                if c not in node:
+                    return False
+                node = node[c]
+
+            return True
+
+        trie = {}
+        res = []
+        words.sort(key=len, reverse=True)
+
+        for w in words:
+            if get(w):
+                res.append(w)
+
+            for i in range(len(w)):
+                add(w[i:])
+
+        return res
 
 ###############################################################################
 
@@ -87,6 +133,7 @@ if __name__ == "__main__":
 
     sol = Solution()
     #sol = Solution2() # functional
+    sol = Solution3() # use suffix trie
 
     comment = 'LC ex1; answer = ["as","hero"]'
     arr = ["mass","as","hero","superhero"]
