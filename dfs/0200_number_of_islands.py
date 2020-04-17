@@ -127,31 +127,35 @@ counter in loop instead.  Check bounds before calling recursively.
 O(mn) time: every cell is looped through.
 O(mn) extra space: recursion goes mn levels deep if all cells are land.
 
-Runtime: 128 ms, faster than 95.97% of Python3 online submissions
-Memory Usage: 13.9 MB, less than 58.12% of Python3 online submissions
+Runtime: 124 ms, faster than 98.33% of Python3 online submissions
+Memory Usage: 15 MB, less than 9.40% of Python3 online submissions
 """
 class Solution2b:
     def numIslands(self, grid: List[List[str]]) -> int:
-        def visit(i, j):
-            if grid[i][j] != "1":
+        def visit(r, c):
+            if grid[r][c] != "1":
                 return
 
-            grid[i][j] = 2 # mark as visited; can also use 0
+            grid[r][c] = 2 # mark as visited; can also use 0
 
-            if i+1 < n_rows: visit(i+1, j)
-            if i-1 >= 0: visit(i-1, j)
-            if j+1 < n_cols: visit(i, j+1)
-            if j-1 >= 0: visit(i, j-1)
+            if r + 1 < m: 
+                visit(r + 1, c)
+            if r > 0: 
+                visit(r - 1, c)
+            if c + 1 < n: 
+                visit(r, c + 1)
+            if c > 0: 
+                visit(r, c - 1)
 
         if not grid:
             return 0
 
-        n_rows = len(grid)
-        n_cols = len(grid[0])
-        
+        m = len(grid)
+        n = len(grid[0])
         n_islands = 0
-        for i in range(n_rows):
-            for j in range(n_cols):
+
+        for i in range(m):
+            for j in range(n):
                 if grid[i][j] == "1":
                     n_islands += 1
                     visit(i, j)
@@ -175,34 +179,37 @@ class Solution3:
         if not grid:
             return 0
 
-        n_rows = len(grid)
-        n_cols = len(grid[0])
-        
+        m = len(grid)
+        n = len(grid[0])
         n_islands = 0
-        for i in range(n_rows):
-            for j in range(n_cols):
+        q = collections.deque([])
+
+        for i in range(m):
+            for j in range(n):
                 if grid[i][j] == "1":
                     n_islands += 1
                     grid[i][j] = "2" # mark as visited
 
-                    q = collections.deque([(i, j)])
+                    #q = collections.deque([(i, j)])
+                    q.append((i, j))
+
                     while q:
                         #print(len(q))
                         r, c = q.popleft()
 
-                        if (r+1 < n_rows) and grid[r+1][c] == "1":
+                        if (r+1 < m) and grid[r+1][c] == "1":
                             q.append((r+1, c))
                             grid[r+1][c] = "2" # mark as visited
                         
-                        if (r-1 >= 0) and grid[r-1][c] == "1":
+                        if (r > 0) and grid[r-1][c] == "1":
                             q.append((r-1, c))
                             grid[r-1][c] = "2" # mark as visited
                         
-                        if (c+1 < n_cols) and grid[r][c+1] == "1":
+                        if (c+1 < n) and grid[r][c+1] == "1":
                             q.append((r, c+1))
                             grid[r][c+1] = "2" # mark as visited
                         
-                        if (c-1 >= 0) and grid[r][c-1] == "1":
+                        if (c > 0) and grid[r][c-1] == "1":
                             q.append((r, c-1))
                             grid[r][c-1] = "2" # mark as visited
 
@@ -211,6 +218,24 @@ class Solution3:
 ###############################################################################
 """
 Solution: Union find.
+
+Each island is a connected component. The count of islands is the count of
+components in the union find.
+
+The subset count in "uf" is initialized to the total number of grid cells.
+We adjust the count within the loop.
+
+(If we instead init'd the union find to be the number of land cells,
+then we would need to also adjust the indices we used for the
+arguments to our union calls.)
+
+Grid coordinates (r, c) is mapped to UF index r * n_cols + c.
+
+Use input grid as visited matrix by changing land "1" to "2".
+
+Visit every cell. If water cell, decrement UF count.
+If unvisited land cell, mark as visited, and union w/ its neighbors to the
+right and below if they are land cells.
 """
 class Solution4:
     def numIslands(self, grid: List[List[str]]) -> int:
@@ -220,12 +245,6 @@ class Solution4:
         n_rows = len(grid)
         n_cols = len(grid[0])
         
-        # The subset count in "uf" is initialized to the total number of cells
-        # in the grid.  We adjust the count within the loop.
-        # If we initialized the union find to be the number of land cells,
-        # then we would need to also adjust the indices we used for the
-        # arguments to our union calls.
-
         #n_land = sum([row.count("1") for row in grid])
         #print(f"n_land = {n_land}")
 
@@ -237,15 +256,18 @@ class Solution4:
             for c in range(n_cols):
                 if grid[r][c] == "0":
                     uf.n -= 1
+
                 elif grid[r][c] == "1":
                     grid[r][c] = "2" # mark as visited
 
+                    # Union (r, c) w/ (r+1, c) if land cell
                     if (r+1 < n_rows) and grid[r+1][c] == "1":
                         uf.union(r*n_cols + c, (r+1)*n_cols + c)
 
                     #if (r-1 >= 0) and grid[r-1][c] == "1":
                     #    uf.union(r*n_cols + c, (r-1)*n_cols + c)
 
+                    # Union (r, c) w/ (r, c+1) if land cell
                     if (c+1 < n_cols) and grid[r][c+1] == "1":
                         uf.union(r*n_cols + c, r*n_cols + c+1)
 
