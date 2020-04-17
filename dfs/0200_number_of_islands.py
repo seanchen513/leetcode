@@ -188,31 +188,36 @@ class Solution3:
             for j in range(n):
                 if grid[i][j] == "1":
                     n_islands += 1
-                    grid[i][j] = "2" # mark as visited
 
                     #q = collections.deque([(i, j)])
                     q.append((i, j))
+                    grid[i][j] = "2" # mark as visited
 
                     while q:
                         #print(len(q))
                         r, c = q.popleft()
 
-                        if (r+1 < m) and grid[r+1][c] == "1":
-                            q.append((r+1, c))
-                            grid[r+1][c] = "2" # mark as visited
-                        
-                        if (r > 0) and grid[r-1][c] == "1":
+                        ### cannot just mark here alone, otherwise a land cell
+                        ### can be put on the stack and then visited more than
+                        ### once via other cells.
+                        # grid[r][c] = "2" # mark as visited
+
+                        if r > 0 and grid[r-1][c] == "1":
                             q.append((r-1, c))
                             grid[r-1][c] = "2" # mark as visited
+
+                        if r+1 < m and grid[r+1][c] == "1":
+                            q.append((r+1, c))
+                            grid[r+1][c] = "2" # mark as visited
+
+                        if c > 0 and grid[r][c-1] == "1":
+                            q.append((r, c-1))
+                            grid[r][c-1] = "2" # mark as visited
                         
-                        if (c+1 < n) and grid[r][c+1] == "1":
+                        if c+1 < n and grid[r][c+1] == "1":
                             q.append((r, c+1))
                             grid[r][c+1] = "2" # mark as visited
                         
-                        if (c > 0) and grid[r][c-1] == "1":
-                            q.append((r, c-1))
-                            grid[r][c-1] = "2" # mark as visited
-
         return n_islands
 
 ###############################################################################
