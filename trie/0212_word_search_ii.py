@@ -26,8 +26,7 @@ The values of words are distinct.
 """
 
 import sys
-sys.path.insert(1, '../../leetcode/trie')
-sys.path.insert(1, '../../') # for DAFSA files
+sys.path.insert(1, '../../leetcode/trie') # includes DAFSA files
 
 from typing import List
 
