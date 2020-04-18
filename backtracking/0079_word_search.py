@@ -29,6 +29,15 @@ board and word consists only of lowercase and uppercase English letters.
 
 from typing import List
 
+"""
+NOT USED:
+
+        dirs = [(-1,0), (1,0), (0,-1), (0,1)]
+
+        dx = [-1, 1,  0, 0]
+        dy = [ 0, 0, -1, 1]
+
+"""
 ###############################################################################
 """
 Solution: backtracking w/ recursion and visited set.
@@ -69,6 +78,7 @@ class Solution:
                     
         m = len(board)
         n = len(board[0])
+        
         visited = set()
         s0 = word[0]
         
@@ -83,34 +93,43 @@ class Solution:
 """
 Solution: instead of visited set, mark visited cells on board with sentinel char.
 Also, pass index in word instead of passing substrings (suffixes).
+Also, check bounds before calling backtrack fn recursively.
 
 O(mn * 4^w) time, where board is m-by-n, and word has length w
 O(w = O(mn) extra space: for recursion stack
 
-Runtime: 300 ms, faster than 89.50% of Python3 online submissions
-Memory Usage: 15.5 MB, less than 14.89% of Python3 online submissions
+Runtime: 260 ms, faster than 96.82% of Python3 online submissions
+Memory Usage: 14.8 MB, less than 27.66% of Python3 online submissions
+
+Also, check character before calling backtrack fn:
+Runtime: 212 ms, faster than 98.95% of Python3 online submissions
+Memory Usage: 15.1 MB, less than 17.02% of Python3 online submissions
 """
 class Solution:
     def exist(self, board: List[List[str]], word: str) -> bool:
         def rec(i, r, c):
-            #if i >= w:
-            #    return True
-            
-            if not (0 <= r < m and 0 <= c < n):
-                return False
-            
-            if word[i] != board[r][c]:
-                return False
+            # if word[i] != board[r][c]:
+            #     return False
             
             board[r][c] = '#' # mark cell as visited using sentinel char
+            i += 1
 
-            if i == w - 1:
+            if i == w:
                 return True
             
-            i += 1
-            if (rec(i, r-1, c) or rec(i, r+1, c) or 
-                rec(i, r, c-1) or rec(i, r, c+1)
-               ):
+            # if ((r > 0 and rec(i, r-1, c)) or 
+            #     (r+1 < m and rec(i, r+1, c)) or 
+            #     (c > 0 and rec(i, r, c-1)) or 
+            #     (c+1 < n and rec(i, r, c+1))
+            # ): 
+            #     return True
+
+            ch = word[i]
+            if ((r > 0 and ch == board[r-1][c] and rec(i, r-1, c)) or 
+                (r+1 < m and ch == board[r+1][c] and rec(i, r+1, c)) or 
+                (c > 0 and ch == board[r][c-1] and rec(i, r, c-1)) or 
+                (c+1 < n and ch == board[r][c+1] and rec(i, r, c+1))
+            ): 
                 return True
 
             # backtrack            
@@ -121,13 +140,64 @@ class Solution:
                     
         m = len(board)
         n = len(board[0])
-        s0 = word[0]
+        
         w = len(word)
+        s0 = word[0]
         
         for i, row in enumerate(board):
             for j, ch in enumerate(row):
                 if ch == s0 and rec(0, i, j):    
                     return True
 
+        return False
+    
+###############################################################################
+"""
+Solution: backtracking using DFS iteration, which uses stack.
+Use "seen" set to track visited board cells.
+
+Runtime: 272 ms, faster than 95.87% of Python3 online submissions
+Memory Usage: 30.3 MB, less than 6.38% of Python3 online submissions
+"""
+class Solution:
+    def exist(self, board: List[List[str]], word: str) -> bool:
+        m = len(board)
+        n = len(board[0])
+
+        w = len(word)
+        s0 = word[0]
+
+        for i, row in enumerate(board):
+            for j, ch in enumerate(row):
+                if ch == s0:
+                    
+                    stack = [(i, j, 1, {(i,j)})] # 1 = next index in word to check
+                    
+                    while stack:
+                        r, c, k, seen = stack.pop()
+                        #print(f"{r}, {c}, {k}")
+
+                        if k == w:
+                            return True
+
+                        ch = word[k]
+                        k += 1
+
+                        r1 = r - 1
+                        if r > 0 and (r1, c) not in seen and ch == board[r1][c]:
+                            stack.append((r1, c, k, seen.union({(r1, c)})))
+                            
+                        r1 = r + 1
+                        if r1 < m and (r1, c) not in seen and ch == board[r1][c]:
+                            stack.append((r1, c, k, seen.union({(r1, c)})))
+                            
+                        c1 = c - 1
+                        if c > 0 and (r, c1) not in seen and ch == board[r][c1]:
+                            stack.append((r, c1, k, seen.union({(r, c1)})))
+                            
+                        c1 = c + 1
+                        if c1 < n and (r, c1) not in seen and ch == board[r][c1]:
+                            stack.append((r, c1, k, seen.union({(r, c1)})))
+                            
         return False
     
