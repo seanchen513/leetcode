@@ -1,5 +1,5 @@
 """
-trie.py: this file uses boolean sentinels for trie nodes.
+trie_word.py: this file uses string sentinels for trie nodes.
 
 Keys and prefixes are strings. Keys are words. 
 Children/edges are letters (one-char strings).
@@ -21,12 +21,12 @@ import collections
 
 class TrieNode:
     def __init__(self):
-        self.children = {} # aka, edges
+        self.children = {}
         #self.children = collections.defaultdict(TrieNode)
         
-        self.is_key = False # aka, final, is_key, is_end, is_word
+        #self.is_key = False # aka, final, is_key, is_end, is_word
         #self.count = 0
-        #self.key = ""
+        self.key = ""
         
 class Trie:
     def __init__(self):
@@ -42,36 +42,27 @@ class Trie:
 
             node = node.children[ch]
 
-        node.is_key = True
+        #node.is_key = True
         #node.count += 1
-        #node.key = word
+        node.key = word
 
-    """
-    TO DO?:
-    Modify this to return None instead of False within loop? That way, we
-    can distinguish:
-    1. None: prefix (and key) doesn't exist.
-    2. False: prefix exists, but it's not a key/word.
-    3. True: key (and prefix) exists.
-
-    Cons: other languages may not be able to do this.
-    Caller would need to test return value carefully.
-    """
-    def search(self, word: str): # return type can be bool, int, str, ...
+    #def search(self, word: str) -> bool:
+    #def search(self, word: str) -> int:
+    def search(self, word: str) -> str:
         node = self.root
 
         for ch in word:
             if ch not in node.children:
-                return False # for boolean sentinel
+                #return False # for boolean sentinel
                 #return 0 # for int counter sentinel
-                #return "" # for string sentinel
+                return "" # for string sentinel
                 #return None # for any sentinel
 
             node = node.children[ch]
  
-        return node.is_key
+        #return node.is_key
         #return node.count
-        #return node.key
+        return node.key
 
     def starts_with(self, prefix: str) -> bool: # search prefix
         node = self.root
@@ -99,18 +90,20 @@ class Trie:
     What about tracing up the tree and deleting all nodes that don't
     have descendents that are keys?
     """
-    def delete(self, word: str): # return type can be bool, int, str, ...
+    #def delete(self, word: str) -> bool:
+    #def delete(self, word: str) -> int:
+    def delete(self, word: str) -> str:
         node = self.root
 
         for ch in word:
             if ch not in node.children:
-                return False # for boolean sentinel
+                #return False # for boolean sentinel
                 #return 0 # for int counter sentinel
-                #return "" # for string sentinel
+                return "" # for string sentinel
                 #return None # for any sentinel
 
             node = node.children[ch]
             
-        node.is_key = False
+        #node.is_key = False
         #node.count = 0
-        #node.key = ""
+        node.key = ""
