@@ -1,25 +1,25 @@
 """
-33. Search in Rotated Sorted Array
+81. Search in Rotated Sorted Array II
 Medium
 
 Suppose an array sorted in ascending order is rotated at some pivot unknown to you beforehand.
 
-(i.e., [0,1,2,4,5,6,7] might become [4,5,6,7,0,1,2]).
+(i.e., [0,0,1,2,2,5,6] might become [2,5,6,0,0,1,2]).
 
-You are given a target value to search. If found in the array return its index, otherwise return -1.
-
-You may assume no duplicate exists in the array.
-
-Your algorithm's runtime complexity must be in the order of O(log n).
+You are given a target value to search. If found in the array return true, otherwise return false.
 
 Example 1:
 
-Input: nums = [4,5,6,7,0,1,2], target = 0
-Output: 4
+Input: nums = [2,5,6,0,0,1,2], target = 0
+Output: true
 Example 2:
 
-Input: nums = [4,5,6,7,0,1,2], target = 3
-Output: -1
+Input: nums = [2,5,6,0,0,1,2], target = 3
+Output: false
+Follow up:
+
+This is a follow up problem to Search in Rotated Sorted Array, where nums may contain duplicates.
+Would this affect the run-time complexity? How and why?
 """
 
 from typing import List
@@ -67,7 +67,7 @@ class Solution:
                 return True
             
             #if arr[mid] > arr[hi]: 
-            if arr[lo] < arr[mid]: # left side is sorted; must be strict >
+            if arr[lo] < arr[mid]: # left side is sorted; must be strict <
                 if arr[lo] <= target < arr[mid]: # target on left side
                     hi = mid - 1
                 else:
@@ -337,7 +337,6 @@ class Solution3c:
         
         # target not found
         return False # return -1
-
 
 ###############################################################################
 """
