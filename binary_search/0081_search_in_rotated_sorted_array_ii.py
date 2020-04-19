@@ -80,13 +80,12 @@ class Solution:
                 else:
                     hi = mid - 1
 
-            else:
+            else: # can't tell if either side is sorted
                 # There are duplicates from lo to mid, or from mid to hi.
                 # Can't tell which side target is on.
                 if target != arr[lo]:
                     lo += 1
-                
-                if target != arr[hi]:
+                else: # if target != arr[hi]:
                     hi -= 1
 
                 # At least one of lo or hi was updated.  Suppose neither
@@ -113,7 +112,7 @@ class Solution1b:
             if target in (arr[lo], arr[mid], arr[hi]):
                 return True
             
-            if arr[lo] < arr[mid]: # left side is sorted; must be strict >
+            if arr[lo] < arr[mid]: # left side is sorted; must be strict <
                 if arr[lo] <= target < arr[mid]: # target on left side
                     lo += 1
                     hi = mid - 1
@@ -129,7 +128,7 @@ class Solution1b:
                     lo += 1
                     hi = mid - 1
 
-            else:
+            else: # can't tell if either side is sorted
                 # There are duplicates from lo to mid, or from mid to hi.
                 # Can't tell which side target is on, but know it's not at
                 # lo, mid, or hi.
@@ -138,6 +137,45 @@ class Solution1b:
 
         return False
 
+"""
+Solution 1c: same as sol 1, but use lo < hi version of bsearch.
+"""
+class Solution1c:
+    def search(self, arr: List[int], target: int) -> bool:
+        if not arr: # need to check
+            return False
+        
+        lo = 0
+        hi = len(arr) - 1 # need to subtract 1
+        
+        while lo < hi:
+            mid = lo + (hi - lo) // 2
+
+            if arr[lo] < arr[mid]: # left side is sorted; must be strict <
+                if arr[lo] <= target <= arr[mid]:
+                    hi = mid
+                else:
+                    lo = mid + 1
+
+            elif arr[mid] < arr[hi]: # right side is sorted; must be strict <
+                if arr[mid] < target <= arr[hi]:
+                    lo = mid + 1
+                else:
+                    hi = mid
+
+            else: # can't tell if either side is sorted
+                # There are duplicates from lo to mid, or from mid to hi.
+                # Can't tell which side target is on.
+                if target != arr[lo]:
+                    lo += 1
+                else: # if target != arr[hi]:
+                    hi -= 1
+
+        if arr[lo] == target:
+            return True
+        
+        return False
+                
 ###############################################################################
 """
 Solution 2: same as for LC33, but at start of loop, skip all duplicates of 
@@ -478,7 +516,8 @@ if __name__ == "__main__":
     # otherwise, check target vs both ends.
     sol = Solution() 
     sol = Solution1b() # same, but check target vs lo, mid, and hi at start of loop
-
+    sol = Solution1c() # same, but use lo < hi version of bsearch.
+    
     #sol = Solution2() # skip all duplicates of arr[lo] on left, of arr[hi] on right
     
     #sol = Solution3() # skip all duplicates of arr[mid] on both sides
