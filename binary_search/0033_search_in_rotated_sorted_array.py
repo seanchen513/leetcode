@@ -64,65 +64,65 @@ In the second case, the subarray from left to mid is sorted.
 
 ###############################################################################
 """
-Solution 1: iterative.
+Solution 1: iterative bsearch with lo <= hi. First branch on subinterval
+that is sorted, then check if target is in that subinterval.
 
 O(log n) time
 O(1) extra space
 """
 class Solution:
     def search(self, arr: List[int], target: int) -> int:
-        left = 0
-        right = len(arr) - 1
+        lo = 0
+        hi = len(arr) - 1
 
-        while left <= right:
-            mid = left + (right - left) // 2
+        while lo <= hi:
+            mid = lo + (hi - lo) // 2
 
             if arr[mid] == target:
                 return mid
             
-            if arr[left] <= arr[mid]: # subarray from left to mid is sorted
-                if arr[left] <= target < arr[mid]:
-                    right = mid - 1
+            if arr[lo] <= arr[mid]: # subarray from lo to mid is sorted
+                if arr[lo] <= target < arr[mid]:
+                    hi = mid - 1
                 else:
-                    left = mid + 1
+                    lo = mid + 1
             
-            else: # arr[mid] <= arr[right], subarray from mid to right is sorted
-                #if arr[mid + 1] <= target <= arr[right]:
-                if arr[mid] < target <= arr[right]:
-                    left = mid + 1
+            else: # arr[mid] <= arr[hi], subarray from mid to hi is sorted
+                #if arr[mid + 1] <= target <= arr[hi]:
+                if arr[mid] < target <= arr[hi]:
+                    lo = mid + 1
                 else:
-                    right = mid - 1
+                    hi = mid - 1
         
         # target not found
         return -1
 
-###############################################################################
 """
-Solution2: recursive.
+Solution 1b: recursive version of sol 1. 
 """
-class Solution2:
+class Solution1b:
     def search(self, arr: List[int], target: int) -> int:
-        def bsearch(left, right):
-            if left > right:
+        def bsearch(lo, hi):
+            if lo > hi:
                 return -1
             
-            mid = left + (right - left) // 2
+            mid = lo + (hi - lo) // 2
 
             if arr[mid] == target:
                 return mid
             
-            if arr[left] <= arr[mid]:
-                if arr[left] <= target < arr[mid]:
-                    return bsearch(left, mid - 1)
+            if arr[lo] <= arr[mid]: # subarray from lo to mid is sorted
+                if arr[lo] <= target < arr[mid]:
+                    return bsearch(lo, mid - 1)
                 else:
-                    return bsearch(mid + 1, right)
+                    return bsearch(mid + 1, hi)
             
-            else: # arr[mid] <= arr[right]
-                #if arr[mid + 1] <= target <= arr[right]:
-                if arr[mid] < target <= arr[right]:
-                    return bsearch(mid + 1, right)
+            else: # arr[mid] <= arr[hi], subarray from mid to hi is sorted
+                #if arr[mid + 1] <= target <= arr[hi]:
+                if arr[mid] < target <= arr[hi]:
+                    return bsearch(mid + 1, hi)
                 else:
-                    return bsearch(left, mid - 1)
+                    return bsearch(lo, mid - 1)
                 
             return -1
 
@@ -130,7 +130,39 @@ class Solution2:
 
 ###############################################################################
 """
-Solution4: first find rotation index (index of smallest value), then do 
+Solution 2: iterative bsearch with lo < hi. First branch on subinterval
+that is sorted, then check if target is in that subinterval.
+"""
+class Solution2:
+    def search(self, arr: List[int], target: int) -> int:
+        if not arr:
+            return -1
+
+        lo = 0
+        hi = len(arr) - 1 # have to subtract 1 here
+        
+        while lo < hi:
+            mid = lo + (hi - lo) // 2
+            
+            if arr[lo] <= arr[mid]: # subarray from lo to mid is sorted
+                if arr[lo] <= target <= arr[mid]:
+                    hi = mid
+                else:
+                    lo = mid + 1
+            else: # arr[mid] <= arr[hi], subarray from mid to hi is sorted
+                if arr[mid] < target <= arr[hi]:
+                    lo = mid + 1
+                else:
+                    hi = mid
+            
+        if arr[lo] == target:
+            return lo
+        
+        return -1
+        
+###############################################################################
+"""
+Solution 3: first find rotation index (index of smallest value), then do 
 binary search accounting for rotation.
 
 There are two approaches to this.  We do approach 1 here.
@@ -196,7 +228,7 @@ class Solution3:
 
 ###############################################################################
 """
-Solution4: first find rotation index (index of smallest value), then do 
+Solution 4: first find rotation index (index of smallest value), then do 
 binary search accounting for rotation.
 
 There are two approaches to this.  We do approach 2 here, and also use a 
@@ -264,8 +296,7 @@ if __name__ == "__main__":
         if comment:
             print(comment)
 
-        print()
-        print(arr)
+        print(f"\narr = {arr}")
         print(f"\ntarget = {target}")
 
         res = sol.search(arr, target)
@@ -273,8 +304,11 @@ if __name__ == "__main__":
         print(f"\nres = {res}")
 
 
-    sol = Solution() # iterative
-    sol = Solution2() # recursive
+    sol = Solution() # iterative bsearch with lo <= hi; branch on sorted subarray
+    sol = Solution1b() # recursive ...
+
+    sol = Solution2() # iterative bsearch with lo < hi
+
     sol = Solution3() # use rotation to find sorted subarray to do bsearch on
     #sol = Solution4() # use rotation index to do bsearch using (mid + rot) % n
 
