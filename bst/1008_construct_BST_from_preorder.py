@@ -28,8 +28,8 @@ import bisect
 """
 Solution: preorder recursion on upper bound for subtree.
 
-Left children are bounded by the value of their parents.
-Right children share the same bound that their parents have.
+Left child is bounded by the value of its parent.
+Right child share the same bound that its parents have.
 
 O(n) time
 O(h) extra space for recursion
