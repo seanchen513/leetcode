@@ -31,8 +31,8 @@ from typing import List
 
 ###############################################################################
 """
-Solution 1: use 2 dicts, one to map chars from s to t, and one to map chars
-from t to s.
+Solution 1: check that forward and reverse maps are well-defined (same letter
+never maps to different letters).
 
 O(n) time, where n is length of each string
 O(n) extra space: for dicts
@@ -60,7 +60,7 @@ class Solution:
 """
 Solution: rewrite
 """
-class Solution:
+class Solution1b:
     def isIsomorphic(self, s: str, t: str) -> bool:
         ds = {}
         dt = {}
@@ -78,3 +78,30 @@ class Solution:
             dt[b] = a
 
         return True
+
+###############################################################################
+"""
+Solution 3: check that map is well-defined, and that domain and range have
+same size.
+"""
+class Solution2:
+    def isIsomorphic(self, s: str, t: str) -> bool:
+        d = {}
+
+        for ch, ch2 in zip(s, t):
+            if ch in d:
+                if d[ch] != ch2:
+                    return False
+            else:
+                d[ch] = ch2
+
+        return len(set(s)) == len(set(t))
+
+###############################################################################
+"""
+Solution 3: check that domain and range have same size, and that size is
+also equal to the number of unique ordered tuples formed by s and t.
+"""
+class Solution3:
+    def isIsomorphic(self, s: str, t: str) -> bool:
+        return len(set(s)) == len(set(t)) == len(set(zip(s, t)))
