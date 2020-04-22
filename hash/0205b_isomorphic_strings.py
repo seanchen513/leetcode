@@ -15,26 +15,36 @@ import collections
 
 ###############################################################################
 """
-Solution:
+Solution: use dict to map each unique letter to the order (among alphabet) it 
+appears in the string. Use this to encode the string. The code represents the 
+group of all isomorphic sequences that the sequence belongs to.
 
 O(mn) time, where n is length of each string, and m is number of strings
 O(mn) extra space
+
+Example:
+aab [0, 0, 1]   "001"
+xxy [0, 0, 1]   "001"
+xyz [0, 1, 2]   "012"
+abc [0, 1, 2]   "012"
+def [0, 1, 2]   "012"
+xyx [0, 1, 0]   "010"
 """
 def group_iso(strs):
     # Each letter is encoded as the order it appears in "s".
-    # Eg, first unique letter is encoded as 0, second unique lgoetter as 1, etc.
+    # Eg, first unique letter is encoded as 0, second unique letter as 1, etc.
     # encode() is O(n) time
     def encode(s):
         d = {}
-        encoded = []
+        code = []
 
         for ch in s:
             if ch not in d:
                 d[ch] = len(d)
 
-            encoded.append(d[ch])
+            code.append(d[ch])
 
-        return str(encoded)
+        return str(code) # makes it hashable
 
     groups = collections.defaultdict(list)
 
