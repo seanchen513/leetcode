@@ -57,7 +57,7 @@ class Solution1b:
         for x in arr:
             s += x
             
-            if s == k:
+            if s == k: # count the prefix sum itself
                 count += 1
 
             # curr_sum - prev_sum = s - (s - k) = k
@@ -110,7 +110,7 @@ class Solution2b:
         for x in arr:
             s += x
             
-            if s == k:
+            if s == k: # count prefix sum itself
                 count += 1
 
             count += want[s]
