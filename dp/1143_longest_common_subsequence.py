@@ -116,7 +116,6 @@ O(mn) time
 O(mn) space: for dp table
 """
 class Solution2:
-    #def longestCommonSubsequence(self, text1: str, text2: str) -> int:
     def longestCommonSubsequence(self, s1: str, s2: str) -> int:
         m = len(s1)
         n = len(s2)        
@@ -176,7 +175,6 @@ O(mn) time
 O(mn) space: for dp table
 """
 class Solution2b:
-    #def longestCommonSubsequence(self, text1: str, text2: str) -> int:
     def longestCommonSubsequence(self, s1: str, s2: str) -> int:
         m = len(s1)
         n = len(s2)        
@@ -207,7 +205,6 @@ O(mn) time
 O(min(m,n)) space: for dp table
 """
 class Solution3:
-    #def longestCommonSubsequence(self, text1: str, text2: str) -> int:
     def longestCommonSubsequence(self, s1: str, s2: str) -> int:
         # Make s2 the smaller string, so the dp table will be smaller.
         if len(s1) < len(s2):
@@ -230,18 +227,15 @@ class Solution3:
         for i in range(1, m):
             ch = s1[i]
 
-            prev2 = dp[0]
-            
-            # if ch == s2[0] or dp[0] == 1:
-            #     dp[0] = 1
-            # else:
-            #     dp[0] = 0
+            #curr = dp[0] # alternative (2)
+            prev = dp[0] # alternative (1)
 
             if ch == s2[0]: # else dp[0] stays whatever it was before (0 or 1)
                 dp[0] = 1
 
             for j in range(1, n):
-                prev, prev2 = prev2, dp[j] # prev is dp[i-1][j-1] in 2d table
+                #prev, curr = curr, dp[j] # alternative (2)
+                curr = dp[j] # prev is dp[i-1][j-1] in 2d table; alternative (1)
 
                 if ch == s2[j]:
                     dp[j] = prev + 1 # prev = dp[j-1] for i-1
@@ -251,13 +245,78 @@ class Solution3:
                 elif dp[j] < dp[j-1]: # else dp[j] stays whatever it was before
                     dp[j] = dp[j-1]
 
+                prev = curr # alternative (1)
+
         return dp[-1] # dp[m-1]
         
 """
 Solution 3b: same, but use padded 1d table to avoid separate initialization.
 
-NOT DONE
 """
+class Solution3b:
+    def longestCommonSubsequence(self, s1: str, s2: str) -> int:
+        # Make s2 the smaller string, so the dp table will be smaller.
+        if len(s1) < len(s2):
+            s1, s2 = s2, s1
+
+        m = len(s1)
+        n = len(s2) # n <= m
+
+        dp = [0] * (n+1)
+        
+        for i in range(1, m+1):
+            ch = s1[i-1]
+
+            curr = 0 # temporary holder for old value of dp[j]
+
+            for j in range(1, n+1):
+                prev, curr = curr, dp[j] # alternative to using prev/curr
+
+                if ch == s2[j-1]:
+                    dp[j] = prev + 1 # prev = dp[j-1] for i-1
+                
+                # else:
+                #     dp[j] = max(dp[j], dp[j-1])
+                elif dp[j] < dp[j-1]: # else dp[j] stays whatever it was before
+                    dp[j] = dp[j-1]
+
+        return dp[-1] # dp[m]
+
+"""
+Solution 3c: same as sol 3b, but prev and curr are coded differently
+(same meaning).
+
+"""
+class Solution3c:
+    def longestCommonSubsequence(self, s1: str, s2: str) -> int:
+        # Make s2 the smaller string, so the dp table will be smaller.
+        if len(s1) < len(s2):
+            s1, s2 = s2, s1
+
+        m = len(s1)
+        n = len(s2) # n <= m
+
+        dp = [0] * (n+1)
+        
+        for i in range(1, m+1):
+            ch = s1[i-1]
+
+            prev = 0 # prev = dp[j-1] for i-1
+
+            for j in range(1, n+1):
+                curr = dp[j] # temporary holder for old value of dp[j]
+
+                if ch == s2[j-1]:
+                    dp[j] = prev + 1 # prev = dp[j-1] for i-1
+                
+                # else:
+                #     dp[j] = max(dp[j], dp[j-1])
+                elif dp[j] < dp[j-1]: # else dp[j] stays whatever it was before
+                    dp[j] = dp[j-1]
+
+                prev = curr
+
+        return dp[-1] # dp[m]
 
 ###############################################################################
 
@@ -281,6 +340,8 @@ if __name__ == "__main__":
     sol = Solution2b() # DP tabulation w/ padded 2d table
     
     #sol = Solution3() # DP tabulation w/ 1d table
+    #sol = Solution3b() # same, but use padded 1d table
+    sol = Solution3c() # same, but code prev/curr differently
 
     comment = "LC ex1; answer = 3"
     s1 = "abcde"
