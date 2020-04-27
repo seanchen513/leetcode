@@ -33,6 +33,79 @@ class Solution:
     def maximalSquare(self, mat: List[List[str]]) -> int:
         @functools.lru_cache(None)
         def rec(r, c):
+            nonlocal mx
+            
+            if r < 0 or c < 0:
+                return 0
+            
+            # Calculate this even if mat[r][c] == '0' in order to traverse
+            # all cells of the matrix.
+            length = min(rec(r-1, c), rec(r, c-1), rec(r-1, c-1)) + 1
+            
+            if mat[r][c] == '1':        
+                mx = max(mx, length)
+                return length
+            
+            return 0
+        
+        if not mat:
+            return 0
+        
+        m = len(mat)
+        n = len(mat[0])
+        mx = 0
+        
+        rec(m-1, n-1)
+        
+        return mx * mx
+             
+"""
+Solution 1b: recursion w/ memoization via @functools.lru_cache().
+Start with first cell.
+
+TLE w/o memoization
+"""
+import functools
+class Solution1b:
+    def maximalSquare(self, mat: List[List[str]]) -> int:
+        @functools.lru_cache(None)
+        def rec(r, c):
+            nonlocal mx
+            
+            if r >= m or c >= n:
+                return 0
+            
+            length = min(rec(r+1, c), rec(r, c+1), rec(r+1, c+1)) + 1
+            
+            if mat[r][c] == '1':        
+                mx = max(mx, length)
+                return length
+            
+            return 0
+        
+        if not mat:
+            return 0
+        
+        m = len(mat)
+        n = len(mat[0])
+        mx = 0
+        
+        rec(0, 0)
+        
+        return mx * mx
+
+"""
+Solution 1c: rewrite.
+Recursion w/ memoization via @functools.lru_cache().
+Start with first cell.
+
+TLE w/o memoization
+"""
+import functools
+class Solution1c:
+    def maximalSquare(self, mat: List[List[str]]) -> int:
+        @functools.lru_cache(None)
+        def rec(r, c):
             nonlocal max_width
 
             if r > 0:
@@ -62,7 +135,8 @@ class Solution:
         return max_width * max_width
 
 """
-Solution 1b: recursion w/ memoization via @functools.lru_cache().
+Solution 1d: rewrite.
+Recursion w/ memoization via @functools.lru_cache().
 Start with first cell.
 
 TLE w/o memoization
@@ -71,7 +145,7 @@ Runtime: 232 ms, faster than 34.83% of Python3 online submissions
 Memory Usage: 22.6 MB, less than 9.09% of Python3 online submissions
 """
 import functools
-class Solution1b:
+class Solution1d:
     def maximalSquare(self, mat: List[List[str]]) -> int:
         @functools.lru_cache(None)
         def rec(r, c):
@@ -107,7 +181,7 @@ class Solution1b:
 
 ###############################################################################
 """
-Solution 2: DP tabulation.  Iterate row by row from start.
+Solution 2: DP tabulation w/ 1d table, padded.  Iterate row by row from start.
 
 dp[i] = max length of square of 1s *ending* at cell (i,j) for j...
 
@@ -146,7 +220,7 @@ class Solution2:
 
 ###############################################################################
 """
-Solution 2b: DP tabulation.  Iterate row by row from start.
+Solution 2b: DP tabulation w/ 2d table.  Iterate row by row from start.
 
 dp[i][j] = max length of square of 1s *ending* at cell (i,j)
 
@@ -195,7 +269,7 @@ class Solution2b:
         return max_d * max_d
 
 """
-Solution 2c: DP tabulation.  Iterate row by row in reverse from end.
+Solution 2c: DP tabulation w/ 2d table.  Iterate row by row in reverse from end.
 
 dp[i][j] = max length of square of 1s *starting* at cell (i,j)
 
@@ -343,6 +417,8 @@ if __name__ == "__main__":
 
     sol = Solution() # recursion w/ memoization, start with last cell
     sol = Solution1b() # recursion w/ memoization, start with first cell
+    sol = Solution1c() # rewrite, start with last cell
+    sol = Solution1d() # rewrite, start with first cell
 
     sol = Solution2() # improved tabulation w/ dp array
     #sol = Solution2b() # tabulation; iterate row by row from start
