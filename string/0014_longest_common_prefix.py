@@ -26,10 +26,13 @@ from typing import List
 
 ###############################################################################
 """
-Solution:
+Solution: go position by position (index i), comparing ith char of each string 
+to ith char of 1st string. Return on 1st string that ends or on 1st mismatch.
 
-O(nm), where n = number of strings, and m = min string length
-O(m) extra space: for string copy s[:i]
+O(n * min_len) time, where n = number of strings, and min_len = min length 
+among all strings
+
+O(min_len) extra space: for string copy s[:i]
 """
 class Solution:
     #def longestCommonPrefix(self, strs: List[str]) -> str:
@@ -41,13 +44,18 @@ class Solution:
         s = arr[0]
         m = len(s)
 
-        for i in range(m): # loop through positions
+        for i in range(m): # loop through positions; ith char
             ch = s[i]
 
-            for j in range(1, n): # loop through strings in array
+            for j in range(1, n): # loop through strings in array; jth string
+                
+                # Case 1: found another string with length <= first string,
+                # and that string has ended.
+                # Case 2: found a character mismatch
                 if i == len(arr[j]) or arr[j][i] != ch:
                     return s[:i]
 
+        # s is the shortest string and no mismatch was found
         return s
   
 """
@@ -137,18 +145,26 @@ if __name__ == "__main__":
     arr = ["flower","flow","flight"]
     test(arr, comment)
 
-    comment = "LC ex1; answer = empty string"
+    comment = "LC ex1; answer = (empty string)"
     arr = ["dog","racecar","car"]
     test(arr, comment)
 
-    comment = "LC test case; answer = empty string"
+    comment = "LC TC; answer = (empty string)"
     arr = []
     test(arr, comment)
 
-    comment = "LC test case; answer = a"
+    comment = "LC TC; answer = (empty string)"
+    arr = [""]
+    test(arr, comment)
+    
+    comment = "LC TC; answer = a"
     arr = ["a"]
     test(arr, comment)
 
-    comment = "LC test case; answer = a"
+    comment = "LC TC; answer = a"
     arr = ["aa", "a"]
+    test(arr, comment)
+
+    comment = "LC TC; answer = aa"
+    arr = ["aacc","aa","aa","aa","aaca"]
     test(arr, comment)
