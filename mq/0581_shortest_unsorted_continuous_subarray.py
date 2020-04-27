@@ -9,7 +9,9 @@ You need to find the shortest such subarray and output its length.
 Example 1:
 Input: [2, 6, 4, 8, 10, 9, 15]
 Output: 5
+
 Explanation: You need to sort [6, 4, 8, 10, 9] in ascending order to make the whole array sorted in ascending order.
+
 Note:
 Then length of the input array is in range [1, 10,000].
 The input array may contain duplicates, so ascending order here means <=.
@@ -20,15 +22,17 @@ from typing import List
 ###############################################################################
 """
 BEST SOLUTION
-Solution 1: find min/max values over all decreasing pairs.  Then scan array
-again to find where they belong for the array to be sorted.
+Solution 1: find min/max values over all decreasing pairs of adjacent elements.
+Then scan array again to find where they belong for the array to be sorted.
 
 O(n) time - 3 unnested loops
 O(1) extra space
 """
 class Solution:
     def findUnsortedSubarray(self, arr: List[int]) -> int:
-        if not arr: return 0
+        if not arr: 
+            return 0
+        
         n = len(arr)
 
         # min/max values over all decreasing pairs
@@ -39,7 +43,7 @@ class Solution:
         left = n - 1
         right = 0
 
-        # find the min/max over all decreasing pairs
+        # find the min and max over all decreasing pairs
         for i in range(1, n):
             if arr[i-1] > arr[i]:
                 min1 = min(min1, arr[i])
@@ -57,29 +61,41 @@ class Solution:
                 right = i
                 break
 
-        return right - left + 1 if right - left > 0 else 0
+        return right - left + 1 if right > left else 0
 
 ###############################################################################
 """
-Solution 2: Find min/max indices over all decreasing pairs.
+Solution 2: use monotone stacks
 
-O(n^2) time
-O(1) extra space
-
-LC TLE
+O(n) time
+O(n) extra space - stack can grow to n
 """
 class Solution2:
-    def findUnsortedSubarray(self, arr: List[int]) -> int:
-        n = len(arr)
-        left = n - 1
+    def findUnsortedSubarray(self, nums: List[int]) -> int:
+        if not nums: 
+            return 0
+        
+        n = len(nums)
+
+        # bounds for the shortest continuous subarray to sort
+        left = n
         right = 0
 
-        for i in range(n):
-            x = arr[i]
-            for j in range(i+1, n):
-                if x > arr[j]:
-                    left = min(left, i)
-                    right = max(right, j)
+        # Use increasing stack to find left bound.
+        # Anytime we find a decrease to x, we have to go back and check which
+        # values are greater than x.
+        stack = []
+        for i, v in enumerate(nums):
+            while stack and v < nums[stack[-1]]:
+                left = min(left, stack.pop())
+            stack.append(i)
+
+        # Use decreasing stack to find right bound.
+        stack = []
+        for i in reversed(range(n)):
+            while stack and nums[i] > nums[stack[-1]]:
+                right = max(right, stack.pop())
+            stack.append(i)
 
         return right - left + 1 if right > left else 0
 
@@ -110,35 +126,29 @@ class Solution3:
 
 ###############################################################################
 """
-Solution 4: use monotone stack.
+Solution 4: brute force. Find min/max indices over all decreasing pairs,
+not necessarily adjacent.
 
-O(n) time
-O(n) extra space - stack an grow to n
+O(n^2) time
+O(1) extra space
+
+LC TLE
 """
 class Solution4:
-    def findUnsortedSubarray(self, nums: List[int]) -> int:
-        if not nums: return 0
-        n = len(nums)
-
-        # bounds for the shortest continuous subarray to sort
-        left = n
+    def findUnsortedSubarray(self, arr: List[int]) -> int:
+        n = len(arr)
+        left = n - 1
         right = 0
 
-        # Use increasing stack to find left bound.
-        stack = []
-        for i, v in enumerate(nums):
-            while stack and v < nums[stack[-1]]:
-                left = min(left, stack.pop())
-            stack.append(i)
+        for i in range(n):
+            x = arr[i]
 
-        # Use decreasing stack to find right bound.
-        stack = []
-        for i in reversed(range(n)):
-            while stack and nums[i] > nums[stack[-1]]:
-                right = max(right, stack.pop())
-            stack.append(i)
+            for j in range(i+1, n):
+                if x > arr[j]:
+                    left = min(left, i)
+                    right = max(right, j)
 
-        return right - left + 1 if right - left > 0 else 0
+        return right - left + 1 if right > left else 0
 
 ###############################################################################
 
@@ -152,14 +162,14 @@ if __name__ == "__main__":
             print(comment)
             
         print(f"\n{arr}")
-        print(f"\nanswer = {res}")
+        print(f"\nresult = {res}\n")
 
 
-    s = Solution() # use min/max values over all decreasing pairs
-    #s = Solution2() # use min/max indices over all decreasing pairs
+    s = Solution() # use min/max values over all decreasing pairs of adjacent elts
+    #s = Solution2() # use monotone stacks
     #s = Solution3() # use sorting
-    #s = Solution4() # monotone stack
-
+    #s = Solution4() # brute force; find min/max indices over all decreasing pairs
+    
     comment = "LC example 1; answer = 5"
     arr = [2, 6, 4, 8, 10, 9, 15]
     test(arr, comment)
@@ -172,6 +182,26 @@ if __name__ == "__main__":
     arr = [1,3,2,2,2]
     test(arr, comment)
 
-    comment = "Already sorted."
+    comment = "LC TC; answer = 0"
+    arr = [1,2,3,4]
+    test(arr, comment)
+
+    comment = "LC TC; answer = 2"
+    arr = [1,3,2,3,3]
+    test(arr, comment)
+    
+    comment = "LC TC; answer = 2"
+    arr = [2,1]
+    test(arr, comment)
+    
+    comment = "already sorted"
     arr = [1,2,3,4,5]
+    test(arr, comment)
+
+    comment = "already reverse sorted"
+    arr = [5,4,3,2,1]
+    test(arr, comment)
+
+    comment = "constant values"
+    arr = [1,1,1,1,1]
     test(arr, comment)
