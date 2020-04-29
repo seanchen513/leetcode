@@ -36,16 +36,22 @@ from binary_tree import TreeNode, print_tree, array_to_bt_lc
 
 ###############################################################################
 """
-Solution: postorder recursion.  Need to track 2 things: max sums of non-V-shaped
-paths (call these arrows), and max sums of possibly V-shaped paths.  
+Solution: postorder recursion.  Need to track 2 things: 
+(1) max sums of non-V-shaped paths (call these arrows), and 
+(2) max sums of possibly V-shaped paths.  
 
 Since the latter is global to the recursion, we make it nonlocal (could also 
 be a class var; or just include it as another return value).
 
 The former is used to update the latter for each node, and is passed up
-to its parent.  Since paths don't need to reach down to the roots,
+to its parent.  Since paths don't need to reach down to the leaves,
 and in order to maximize sums, we don't let arrows have negative sums
 (take an empty arrow with 0 sum instead).
+
+Here we make 0 a lower bound of the return value with max(0, *).
+Alternatively, we can do the same thing with the recursive calls:
+    left_arrow = max(0, dfs(node.left))
+    right_arrow = max(0, dfs(node.right))
 
 O(n) time
 O(h) extra space for recursion
@@ -67,6 +73,7 @@ class Solution:
             return max(0, max(left_arrow, right_arrow) + node.val)
 
         max_sum = float('-inf') # this is for possibly V-shaped paths
+
         dfs(root)
 
         return max_sum
@@ -87,18 +94,18 @@ if __name__ == "__main__":
         print(arr, "\n")
 
         print_tree(root)
-        print(f"\nSolutions: {res}")
-        
+        print(f"\nSolutions: {res}")  
 
-    comment = "LC example 1; answer = 6"
+
+    comment = "LC ex1; answer = 6"
     arr = [1,2,3]
     test(arr, comment)
 
-    comment = "LC example 2; answer = 42"
+    comment = "LC ex2; answer = 42"
     arr =  [-10,9,20,None,None,15,7]
     test(arr, comment)
 
-    comment = "LC test case; answer = 2"
+    comment = "LC TC; answer = 2"
     arr = [2,-1]
     test(arr, comment)
     
