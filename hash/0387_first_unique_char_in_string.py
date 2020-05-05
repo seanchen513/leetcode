@@ -7,23 +7,44 @@ Given a string, find the first non-repeating character in it and return it's ind
 Examples:
 
 s = "leetcode"
-return 0.
+return 0
 
-s = "loveleetcode",
-return 2.
+s = "loveleetcode"
+return 2
+
 Note: You may assume the string contain only lowercase letters.
 """
 
 import collections
+import string
 
 ###############################################################################
 """
-Solution 1: use dict; if same letter seen again, set d[ch] = float('inf')
+Solution 1: use dict to count chars. Do 2nd pass to look for char with count 1.
 
 O(n) time
-O(1) extra space: since dict limited to 26 entries
+O(26) extra space: since dict limited to 26 entries
 """
 class Solution:
+    def firstUniqChar(self, s: str) -> int:
+        d = collections.Counter(s)
+        
+        for i, ch in enumerate(s):
+            if d[ch] == 1:
+                return i
+        
+        return -1
+
+###############################################################################
+"""
+Solution 2: use dict to map chars to their first index. If char is seen again,
+set value to dummy value at least len(s). Index of first unique char is then
+the min of all dict values.
+
+O(n) time
+O(26) extra space: since dict limited to 26 entries
+"""
+class Solution2:
     def firstUniqChar(self, s: str) -> int:
         if s == "":
             return -1
@@ -43,7 +64,7 @@ class Solution:
 
 ###############################################################################
 """
-Solution 2: use dict w/ seen set.
+Solution 3: use dict w/ seen set.
 
 O(n) time
 O(1) space
@@ -51,7 +72,7 @@ O(1) space
 Runtime: 92 ms, faster than 83.60% of Python3 online submissions
 Memory Usage: 12.9 MB, less than 100.00% of Python3 online submissions
 """
-class Solution2:
+class Solution3:
     def firstUniqChar(self, s: str) -> int:
         d = {}
         seen = set()
@@ -67,12 +88,12 @@ class Solution2:
 
 ###############################################################################
 """
-Solution 3: use dict mapping chars to list of indices
+Solution 4: use dict mapping chars to list of indices
 
 O(n) time
 O(n) extra space: dict limited to 26 entries, but total of n values
 """
-class Solution3:
+class Solution4:
     def firstUniqChar(self, s: str) -> int:
         d = collections.defaultdict(list)
         
@@ -89,7 +110,7 @@ class Solution3:
 
 ###############################################################################
 """
-Solution 4: use s.index()
+Solution 5: use s.index()
 
 https://leetcode.com/problems/first-unique-character-in-a-string/discuss/86351/Python-3-lines-beats-100-(~-60ms)-!
 
@@ -101,14 +122,17 @@ than the others. But good to know for Python users for runtime speedup.
 Runtime: 40 ms, faster than 99.15% of Python3 online submissions
 Memory Usage: 12.8 MB, less than 100.00% of Python3 online submissions
 """
-class Solution4:
+class Solution5:
     def firstUniqChar(self, s: str) -> int:
-        letters = 'abcdefghijklmnopqrstuvwxyz'
-        index = [s.index(l) for l in letters if s.count(l) == 1]
+        #letters = 'abcdefghijklmnopqrstuvwxyz'
+        #index = [s.index(ch) for ch in letters if s.count(ch) == 1]
+
+        index = [s.index(ch) for ch in string.ascii_lowercase if s.count(ch) == 1]
 
         return min(index) if len(index) > 0 else -1
 
 ###############################################################################
+
 if __name__ == "__main__":
     def test(s, comment=None):
         print("="*80)
@@ -119,13 +143,14 @@ if __name__ == "__main__":
         
         res = sol.firstUniqChar(s)
 
-        print(f"\nres = {res}")
+        print(f"\nres = {res}\n")
 
 
-    sol = Solution() # use dict; if same letter seen again, set d[ch] = float('inf')
-    sol = Solution2() # use dict w/ seen set
-    #sol = Solution3() # use dict mapping chars to list of indices
-    #sol = Solution4() # use s.index()
+    sol = Solution() # use dict to count chars. Do 2nd pass to look for char with count 1
+    #sol = Solution2() # use dict; if same letter seen again, set d[ch] = float('inf')
+    #sol = Solution3() # use dict w/ seen set
+    #sol = Solution4() # use dict mapping chars to list of indices
+    #sol = Solution5() # use s.index()
 
     comment = "LC ex1; answer = 0"
     s = "leetcode"
