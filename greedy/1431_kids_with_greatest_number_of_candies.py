@@ -39,7 +39,8 @@ from typing import List
 
 ###############################################################################
 """
-Solution:
+Solution: check each kid's candy count by greedily giving him all the
+extra candies.
 
 O(n) time
 O(n) extra space
