@@ -35,10 +35,10 @@ import itertools
    
 ###############################################################################
 """
-Solution 1: use min heap.  Get smallest k elements from k sorted lists of sums.
+Solution 1: use min heap. Get smallest k elements from m sorted lists of sums.
 
-Start with first sum arr1[0] + arr2[0].  Each time an entry is popped from
-heap, push the entry next in the row (if there are anymore).  If the popped
+Start with first sum arr1[0] + arr2[0]. Each time an entry is popped from
+heap, push the entry next in the row (if there are anymore). If the popped
 entry was first in its row, then also add the first entry of the next row.
 
 Based on solution 5 here:
@@ -53,7 +53,7 @@ arr1 = [1,7,11,16]
 arr2 = [2,9,10,15]
 
 Arrange values of arr1 along column, and values of arr2 along row.
-The sums form a matrix.  Since the arrays are sorted, each row and column of 
+The sums form a matrix. Since the arrays are sorted, each row and column of 
 the matrix is also sorted.
 
     2       9       10      15
@@ -68,9 +68,16 @@ the matrix is also sorted.
 11  13      20      21      26
 16  18      25      26      31
 
-Looking at rows, we have k sorted lists of sums.  So this problem is like
-merging k sorted lists, or finding the smallest k elements from k sorted
+Looking at rows, we have m sorted lists of sums. So this problem is like
+merging m sorted lists, or finding the smallest k elements from m sorted
 lists.
+
+O(k log m) ~ O(mn log m) time
+
+O(m) extra space: for heap
+- Start with 1 elt in heap. If smallest sum is in 1st column, then 2 elts
+are pushed onto heap, for net change of +1. This can be done m-1 times at
+the start, resulting in m elts on the heap.
 
 Runtime: 44 ms, faster than 92.22% of Python3 online submissions
 Memory Usage: 12.9 MB, less than 100.00% of Python3 online submissions
@@ -83,65 +90,75 @@ class Solution:
         # Start with first sum only.
         h = [(arr1[0] + arr2[0], 0, 0)] # (sum, row index, col index)
 
+        m = len(arr1)
+        n = len(arr2)
+
         # Adjust k in case it's > number of possible sums.
-        # Alternatively, can use "while h and count < k".
-        k = min(k, len(arr1)*len(arr2))
-
+        # Alternatively, can use "while h and len(res) < k".
+        k = min(k, m*n)
         res = [] # results
-        count = 0
 
-        while count < k:
-        #while h and count < k:
+        while len(res) < k:
+        #while h and len(res) < k:
+            #print(h)
             _, r, c = heapq.heappop(h) # sum, row index, column index
 
-            res.append([arr1[r], arr2[c]])
-            count += 1
+            res.append( [arr1[r], arr2[c]] )
 
-            if c == 0 and r < len(arr1) - 1: # add entry from first sum of next row
-                heapq.heappush(h, (arr1[r + 1] + arr2[0], r + 1, 0) )
+            if c == 0 and r+1 < m: # add entry from first sum of next row
+                heapq.heappush(h, (arr1[r+1] + arr2[0], r+1, 0) )
 
-            if c < len(arr2) - 1: # add entry from next sum of same row
-                heapq.heappush(h, (arr1[r] + arr2[c], r, c + 1) )
+            if c+1 < n: # add entry from next sum of same row
+                heapq.heappush(h, (arr1[r] + arr2[c+1], r, c+1) )
 
         return res
 
 """
-Solution 1b: use min heap.  Get smallest k elements from k sorted lists of sums.
+Solution 1b: use min heap. Get smallest k elements from m sorted lists of sums.
 
-Same as sol 1, but start by adding first element of each sums list
-to heap.  
+Same as sol 1, but start by adding first element of each sorted list to heap.
 
-O((k+len(arr1)) log k) time, assuming k <= len(arr1)*len(arr2)
-O(len(arr1)) extra space
+Size of heap is at most m1 = min(k, m).
+
+O(m1 + k log m1) ~ O(mn log m) time
+- O(m1) time for building initial heap and for heapify
+- O(k log m1) time for O(2k) heap operations on heap of size at most m1.
+
+O(m1) ~ O(m) extra space: for heap
+
 """
 class Solution1b:
     def kSmallestPairs(self, arr1: List[int], arr2: List[int], k: int) -> List[List[int]]:
         if not arr1 or not arr2:
             return []
 
-        h = [] # min heap
-        res = [] # results
-
-        # Add first element of each sorted sums list to heap.
-        y = arr2[0]
-        for i, x in enumerate(arr1):
-            heapq.heappush(h, (x + y, i, 0) ) # (sum, row index, column index)
+        m = len(arr1)
+        n = len(arr2)
 
         # Adjust k in case it's > number of possible sums.
-        # Alternatively, can use "while h and count < k".
-        k = min(k, len(arr1)*len(arr2))
+        # Alternatively, can use "while h and len(res) < k".
+        k = min(k, m*n)
+        res = [] # results
 
-        count = 0
+        # h = [] # min heap
+        # for i, x in enumerate(arr1):
+        #     heapq.heappush(h, (x + y, i, 0) ) # (sum, row index, column index)
 
-        while count < k:
-        #while h and count < k:
+        # Add first element of each list of sorted sums to heap.
+        y = arr2[0]
+        #h = [(x+y, i, 0) for i, x in enumerate(arr1)]
+        m1 = min(k, m)
+        h = [(arr1[i] + y, i, 0) for i in range(m1)]
+        heapq.heapify(h)
+
+        while len(res) < k:
+        #while h and len(res) < k:
             _, r, c = heapq.heappop(h) # sum, row index, column index
 
-            res.append([arr1[r], arr2[c]])
-            count += 1
+            res.append( [arr1[r], arr2[c]] )
 
-            if c < len(arr2) - 1: # add entry from next sum of same row
-                heapq.heappush(h, (arr1[r] + arr2[c], r, c + 1) )
+            if c+1 < n: # add entry from next sum of same row
+                heapq.heappush(h, (arr1[r] + arr2[c+1], r, c+1) )
 
         return res
 
@@ -204,7 +221,7 @@ if __name__ == "__main__":
         
         res = sol.kSmallestPairs(nums1, nums2, k)
 
-        print(f"\nres = {res}")
+        print(f"\nres = {res}\n")
 
 
     sol = Solution() # use min heap; treat as m sorted lists of sums
