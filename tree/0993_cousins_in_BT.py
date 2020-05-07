@@ -38,9 +38,9 @@ from binary_tree import TreeNode, print_tree, array_to_bt_lc
 
 ###############################################################################
 """
-Solution: BFS with "level" list that also serves as a dict of node->parent.
-Check if the given nodes are found at the same level, and check if they
-have the same parent.
+Solution: BFS with "level" and "next_level" dicts that map each node to its
+parent. Check if the given nodes are found at the same level, 
+and check if they have the same parent.
 
 O(n) time
 O(n) extra space for "level" list
@@ -75,9 +75,42 @@ class Solution:
 
 ###############################################################################
 """
-Solution 1b: like sol #1, but instead of using "level" as a dict, use it as a 
-plain list, and use the fact that cousins cannot be adjacent while looping 
-through level.  One way to do this is to use a loop counter, and store the 
+Solution 1b: same, but use "level" and "next_level" lists that store tuples
+(node, parent). Use "found" dict that maps given nodes (if found) to their parents.
+"""
+class Solution1b:
+    def isCousins(self, root: TreeNode, x: int, y: int) -> bool:
+        level = [(root, None)]
+        
+        while level:
+            next_level = []
+            found = {}
+            
+            for node, parent in level:
+                if node.val == x:
+                    found[x] = parent
+                elif node.val == y:
+                    found[y] = parent
+                    
+                if node.left:
+                    next_level.append((node.left, node))
+                if node.right:
+                    next_level.append((node.right, node))
+                    
+            if len(found) == 2:
+                return found[x] != found[y]
+            elif len(found) == 1:
+                return False
+                    
+            level = next_level
+            
+        return False
+
+###############################################################################
+"""
+Solution 1c: same, but use "level" and "next_level" lists. 
+Use fact that cousins cannot be adjacent while looping through each level.
+One way to do this is to use a loop counter, and store the 
 counter as flags for the found nodes.  
 
 Be careful to increment the counter for positions where a node is not present.
@@ -92,7 +125,7 @@ O(n) time
 O(n) extra space for "level" list (due to last level)
 O(1) other extra space
 """
-class Solution1b:
+class Solution1c:
     def isCousins(self, root: TreeNode, x: int, y: int) -> bool:
         level = [root]
 
@@ -157,7 +190,7 @@ if __name__ == "__main__":
     def test(arr, x, y, comment=None):
         root = array_to_bt_lc(arr)
         
-        solutions = [Solution(), Solution1b(), Solution2()]
+        solutions = [Solution(), Solution1b(), Solution1c(), Solution2()]
 
         res = [s.isCousins(root, x, y) for s in solutions]        
 
