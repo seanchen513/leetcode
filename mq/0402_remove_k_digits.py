@@ -58,15 +58,23 @@ class Solution:
         while count < k and stack:
             stack.pop()
             count += 1
+        # if count < k:
+        #     stack = stack[:count-k]
 
         ### Don't need this if check k >= len(n) at start
         # if not stack:
         #     return "0"
 
+        ### Remove all beginning 0's.
         return str(int(''.join(stack)))
 
+
 """
-Solution 1b: same, but break early from loop if count == k.
+Solution 1b: same, but with these changes:
+
+- Break early from loop if count == k.
+- Remove all beginning 0's by finding index of first nonzero digit.
+
 """
 class Solution1b:
     def removeKdigits(self, n: str, k: int) -> str:
@@ -92,12 +100,24 @@ class Solution1b:
         while count < k and stack:
             stack.pop()
             count += 1
+        # if count < k:
+        #     stack = stack[:count-k]
 
         ### Don't need this if check k >= len(n) at start
         # if not stack:
         #     return "0"
 
-        return str(int(''.join(stack)))
+        ### Remove all beginning 0's.
+        #return str(int(''.join(stack)))
+
+        i = 0
+        while i < len(stack) and stack[i] == '0':
+            i += 1
+
+        if i == len(stack):
+            return "0"
+
+        return ''.join(stack[i:])
 
 ###############################################################################
 
@@ -116,7 +136,7 @@ if __name__ == "__main__":
 
 
     sol = Solution()
-    sol = Solution1b() # same, but early break from loop
+    #sol = Solution1b() # same, but early break from loop
 
     comment = "LC ex1; answer = 1219"
     n = "1432219"
