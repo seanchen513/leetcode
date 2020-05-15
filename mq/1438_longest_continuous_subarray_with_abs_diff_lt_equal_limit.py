@@ -50,6 +50,7 @@ import heapq
 ###############################################################################
 """
 Solution: use sliding window with inc queue for min and dec queue for max.
+Maintain loop invariant: sliding window satisfies problem condition.
 
 Two pointers: left and right ends of sliding window (subarray).
 
@@ -74,17 +75,8 @@ O(n) extra space
 
 https://leetcode.com/problems/longest-continuous-subarray-with-absolute-diff-less-than-or-equal-to-limit/discuss/609708/Python-Clean-Monotonic-Queue-solution-with-detail-explanation-O(N)
 
-Using "res = max(res, r - l)":
-Runtime: 392 ms, faster than 95.55% of Python3 online submissions
-Memory Usage: 24 MB, less than 100.00% of Python3 online submissions
-
-Using "elif r - l > res":
 Runtime: 372 ms, faster than 97.37% of Python3 online submissions
 Memory Usage: 24 MB, less than 100.00% of Python3 online submissions
-
-If use "return len(arr) - l" instead of tracking "res":
-Runtime: 360 ms, faster than 98.38% of Python3 online submissions
-Memory Usage: 23.9 MB, less than 100.00% of Python3 online submissions
 """
 class Solution:
     def longestSubarray(self, arr: List[int], limit: int) -> int:
@@ -92,8 +84,7 @@ class Solution:
         res = 0
 
         min_deque = collections.deque() # inc queue
-        max_deque = collections.deque() # dec 
-        #counts = [] # for testing
+        max_deque = collections.deque() # dec queue
 
         for r, x in enumerate(arr): # r = index of right end of sliding window (subarray)
             # Maintain increasing queue.
@@ -107,14 +98,8 @@ class Solution:
             min_deque.append(r)
             max_deque.append(r)
 
-            #cnt = 0 # for testing
-            
-            if arr[max_deque[0]] - arr[min_deque[0]] > limit:                
-                # Increment l (left end of window) and update queues.
-
-                #cnt += 1
-                #print(f"r = {r}, l = {l}")
-                
+            # Maintain loop invariant: sliding window satisfies problem condition.
+            while arr[max_deque[0]] - arr[min_deque[0]] > limit:
                 # l += 1
                 # if l > min_deque[0]:
                 #     min_deque.popleft()
@@ -129,29 +114,101 @@ class Solution:
 
                 l += 1
 
-            elif r - l > res:
+            if r - l > res:
                 res = r - l
 
-            #res = max(res, r - l)
-
-            #counts.append(cnt)
-            #if r < 100 and cnt > 0 :
-            #    print(f"cnt = {cnt}")
-
-        #print(f"avg cnt = {sum(counts)/len(counts)}")
-
         return res + 1
-        #return len(arr) - l # ??? don't know why this works
 
 """
-Solution 1b:
+Solution 1b: same, but let sliding window grow monotonically.
+"""
+class Solution1b:
+    def longestSubarray(self, arr: List[int], limit: int) -> int:
+        l = 0 # index of left end of sliding window (subarray)
+
+        min_deque = collections.deque() # inc queue
+        max_deque = collections.deque() # dec queue
+
+        for r, x in enumerate(arr): # r = index of right end of sliding window (subarray)
+            # Maintain increasing queue.
+            while min_deque and x < arr[min_deque[-1]]: # can use < or <=
+                min_deque.pop()
+
+            # Maintain decreasing queue.
+            while max_deque and x > arr[max_deque[-1]]: # can use > or >=
+                max_deque.pop()
+
+            min_deque.append(r)
+            max_deque.append(r)
+
+            if arr[max_deque[0]] - arr[min_deque[0]] > limit:                
+                # Increment l (left end of window) and update queues.
+               
+                # l += 1
+                # if l > min_deque[0]:
+                #     min_deque.popleft()
+                # if l > max_deque[0]:
+                #     max_deque.popleft()
+
+                if l == min_deque[0]:
+                    min_deque.popleft()
+
+                if l == max_deque[0]:
+                    max_deque.popleft()
+
+                l += 1
+
+        return len(arr) - l
+
+###############################################################################
+"""
+Solution 2: same, but store values instead of indices.
+Maintain loop invariant: sliding window satisfies problem condition.
 
 https://leetcode.com/problems/longest-continuous-subarray-with-absolute-diff-less-than-or-equal-to-limit/discuss/609771/JavaC%2B%2BPython-Deques-O(N)
 
 Runtime: 340 ms, faster than 100.00% of Python3 online submissions
 Memory Usage: 24 MB, less than 100.00% of Python3 online submissions
 """
-class Solution1b:
+class Solution2:
+    def longestSubarray(self, arr: List[int], limit: int) -> int:
+        l = 0 # index of left end of sliding window (subarray)
+        res = 0
+
+        min_deque = collections.deque() # inc queue
+        max_deque = collections.deque() # dec queue
+
+        for r, x in enumerate(arr):
+            # Maintain increasing queue.
+            while min_deque and x < min_deque[-1]: # <= does not work
+                min_deque.pop()
+
+            # Maintain decreasing queue.
+            while max_deque and x > max_deque[-1]: # >= does not work
+                max_deque.pop()
+
+            min_deque.append(x)
+            max_deque.append(x)
+
+            # Increment l (left end of window) and update queues.
+            while max_deque[0] - min_deque[0] > limit:
+                if min_deque[0] == arr[l]:
+                    min_deque.popleft()
+
+                if max_deque[0] == arr[l]:
+                    max_deque.popleft()
+
+                l += 1
+
+            if r - l > res:
+                res = r - l
+
+        return res + 1
+
+"""
+Solution 2b: same, but let sliding window grow monotonically.
+"""
+class Solution2b:
     def longestSubarray(self, arr: List[int], limit: int) -> int:
         l = 0 # index of left end of sliding window (subarray)
 
@@ -172,8 +229,6 @@ class Solution1b:
 
             # Increment l (left end of window) and update queues.
             # Using "while" loop does not work.
-            # In the previous iteration, max - min of window is within limit.
-            # If adding the current elt breaks the limit, then ...
             if max_deque[0] - min_deque[0] > limit:
                 if min_deque[0] == arr[l]:
                     min_deque.popleft()
@@ -184,15 +239,15 @@ class Solution1b:
                 l += 1
 
             #if l < 10 and len(min_deque) < 10:
-            if len(arr) < 20:
-                print("\nAFTER:")
-                print(f"l = {l}")
-                print(f"min_deque = {list(min_deque)}")
-                print(f"max_deque = {list(max_deque)}")
-                if len(arr) - l < 20:
-                    print(f"(NOT necc window) arr[l:] = {arr[l:]}")
+            # if len(arr) < 20:
+            #     print("\nAFTER:")
+            #     print(f"l = {l}")
+            #     print(f"min_deque = {list(min_deque)}")
+            #     print(f"max_deque = {list(max_deque)}")
+            #     if len(arr) - l < 20:
+            #         print(f"(NOT necc window) arr[l:] = {arr[l:]}")
 
-        return len(arr) - l # ??? don't know why this works
+        return len(arr) - l
 
 """
 LC ex2:
@@ -258,212 +313,69 @@ window = [2,4,7,2]
 
 ###############################################################################
 """
-Solution 2: brute force w/ early break/return if n - i < res.
-
-TLE's w/o early break.
-
-O() time ???
-O(1) extra space
-
-Runtime: 612 ms, faster than 40.00% of Python3 online submissions
-Memory Usage: 23.9 MB, less than 100.00% of Python3 online submissions
-"""
-class Solution2:
-    def longestSubarray(self, arr: List[int], limit: int) -> int:
-        n = len(arr)
-        res = 1 # max length
-
-        for i in range(n):
-            if n - i < res:
-                break
-
-            mn = mx = arr[i]
-
-            for j in range(i+1, n):
-                x = arr[j]
-                if x < mx - limit or x > mn + limit:
-                    break
-
-                mn = min(mn, x)
-                mx = max(mx, x)
-                res = max(res, j - i + 1)
-
-        return res
-
-"""
-Solution 2b: same, but using for-else.
-
-Runtime: 512 ms, faster than 81.70% of Python3 online submissions
-Memory Usage: 23.9 MB, less than 100.00% of Python3 online submissions
-"""
-class Solution2b:
-    def longestSubarray(self, arr: List[int], limit: int) -> int:
-        n = len(arr)
-        res = 1 # max length
-
-        for i in range(n):
-            if n - i < res:
-                break
-
-            mn = mx = arr[i]
-
-            for j in range(i+1, n):
-                x = arr[j]
-                if x < mx - limit or x > mn + limit:
-                    res = max(res, j - i)
-                    break
-
-                mn = min(mn, x)
-                mx = max(mx, x)
-            else:
-                res = max(res, n - i)
-
-        return res
-
-"""
-Solution 2c: same, but optimized a bit (no for-else).
-
-Runtime: 404 ms, faster than 80.00% of Python3 online submissions
-Memory Usage: 24 MB, less than 100.00% of Python3 online submissions
-"""
-class Solution2b:
-    def longestSubarray(self, arr: List[int], limit: int) -> int:
-        n = len(arr)
-        res = 0
-
-        for i in range(n):
-            if n - i < res:
-                break
-
-            mx = mn = arr[i]
-            mx_limit = mx - limit
-            mn_limit = mn + limit
-            
-            for j in range(i+1, n):
-                x = arr[j]
-                if x < mx_limit or x > mn_limit:
-                    break
-
-                if x < mn:
-                    mn = x
-                    mn_limit = mn + limit
-                if x > mx:
-                    mx = x
-                    mx_limit = mx - limit
-                if j - i > res:
-                    res = j - i
-
-        return res + 1
-
-
-"""
-Solution 2d: same, but optimized a bit and using for-else.
-
-Runtime: 372 ms, faster than 97.37% of Python3 online submissions
-Memory Usage: 23.9 MB, less than 100.00% of Python3 online submissions
-"""
-class Solution2d:
-    def longestSubarray(self, arr: List[int], limit: int) -> int:
-        n = len(arr)
-        res = 1
-
-        for i in range(n):
-            if n - i < res:
-                break
-
-            mx = mn = arr[i]
-            mx_limit = mx - limit
-            mn_limit = mn + limit
-            
-            for j in range(i+1, n):
-                x = arr[j]
-                if x < mx_limit or x > mn_limit:
-                    if j - i > res:
-                        res = j - i
-                    break
-
-                if x < mn:
-                    mn = x
-                    mn_limit = mn + limit
-                if x > mx:
-                    mx = x
-                    mx_limit = mx - limit
-            
-            else:
-                if n - i > res:
-                    res = n - i
-
-        return res
-
-"""
-DOESNT WORK
-
-IDEA from comments:
-brute force almost O(n^2) solution where I'd backtrack to the the location of
-the current subarray's min or max after hitting a difference > limit.
-"""
-class Solution2c:
-    def longestSubarray(self, arr: List[int], limit: int) -> int:
-        n = len(arr)
-        res = 0
-        i = 0
-
-        while i < n:
-            if n - i < res:
-                break
-
-            mn = mx = arr[i]
-            min_idx = max_idx = 0
-
-            for j in range(i+1, n):
-                x = arr[j]
-                # if x < mx - limit or x > mn + limit:
-                #     i = min(min_idx, max_idx)
-                #     break
-
-                if x < mx - limit:
-                    i = min_idx - 1
-                    #break
-                    
-                if x > mn + limit:
-                    i = max_idx - 1
-                    #break
-
-                if x < mn:
-                    mn = x
-                    min_idx = j
-
-                if x > mx:
-                    mx = x
-                    max_idx = j
-
-                res = max(res, j - i)
-
-            i += 1
-
-        return res + 1
-
-
-###############################################################################
-"""
 Solution 3: sliding window with sorted list and binary insert/remove.
 
-Keep sorted list of values from current sliding window. 
+Keep sorted list of values from current sliding window.
+Loop invariant: sorted list (and window) satisfies problem condition:
+abs diff of any two elts <= limit.
+
 This makes it easy to access the min and max elements in the window.
 Insert new elements in sorted order.
 If range of sorted list exceeds limit, binary search for the elt leftmost 
 in array and remove it from sorted list.
 
-Note: doesn't work if we change the inner "if" statement into a 
-"while" loop.
+This is slow because of a lot of unnecessary pops in inner "while" loop
+to maintain loop invariant.
 
 O(n^2) time: due to list.pop() within loop
 O(n) extra space: for sorted list
 
-Runtime: 348 ms, faster than 100.00% of Python3 online submissions
+Runtime: 1580 ms, faster than 5.78% of Python3 online submissions
 Memory Usage: 23.9 MB, less than 100.00% of Python3 online submissions
 """
 class Solution3:
+    def longestSubarray(self, arr: List[int], limit: int) -> int:
+        n = len(arr)
+        res = 0
+
+        l = 0 # left end of sliding window (subarray)
+        s = [] # sorted list
+        
+        for r in range(n):
+            bisect.insort(s, arr[r])
+
+            # Remove elements from left side until sliding window satisfies
+            # problem condition.
+            # Solution happens to work if "while" is replaced by "if", but...
+            while s[-1] - s[0] > limit:
+                # Note: we are removing the element in s that is leftmost
+                # in the input array. This is usually not the same as the
+                # smallest/first element in s.
+                s.pop( bisect.bisect_left(s, arr[l]) )
+                l += 1
+            
+            if r - l > res:
+                res = r - l
+
+        return res + 1
+
+"""
+Solution 3b: same, but instead of forcing sorted list (sliding window) to
+satisfy problem condition at all times, only pop elements one at a time
+when necessary.
+
+The sorted list grows monotonically. It never shrinks when moving from one 
+index to the next. In each iteration, a new element is added, and either no 
+element is removed or one element is removed. Once the sorted list reaches 
+max size, it stays there.
+
+Note: doesn't work if we change the inner "if" statement into a 
+"while" loop.
+
+Runtime: 348 ms, faster than 100.00% of Python3 online submissions
+Memory Usage: 23.9 MB, less than 100.00% of Python3 online submissions
+"""
+class Solution3b:
     def longestSubarray(self, arr: List[int], limit: int) -> int:
         n = len(arr)
 
@@ -473,7 +385,7 @@ class Solution3:
         for r in range(n):
             bisect.insort(s, arr[r])
 
-            if s[-1] - s[0] > limit:
+            if s[-1] - s[0] > limit: # cannot use "while" loop here
                 # Note: we are removing the element in s that is leftmost
                 # in the input array. This is usually not the same as the
                 # smallest/first element in s.
@@ -481,6 +393,7 @@ class Solution3:
                 l += 1
 
         #return r - l + 1
+        #return n - l # after loop, r = n-1
         return len(s)
 
 """
@@ -537,7 +450,9 @@ return r - l + 1 = 5 - 2 + 1 = 4
 
 ###############################################################################
 """
-Solution 4: use sortedcontainer's SortedDict.
+Solution 4: use sortedcontainer's SortedDict. 
+
+Loop invariant: force sliding window to maintain problem condition.
 
 Similar to using sorted list, but avoids list pop()'s O(n) time.
 Instead, del d[] and d update are O(1). (Note: d.pop() is O(log n).)
@@ -558,9 +473,8 @@ import sortedcontainers
 class Solution4:
     def longestSubarray(self, arr: List[int], limit: int) -> int:
         d = sortedcontainers.SortedDict()
-        l = 0
+        l = 0 # left index of sliding window
         res = 0
-        #n = len(arr)
 
         for r, x in enumerate(arr):
             #d[x] = d.get(x, 0) + 1
@@ -569,7 +483,39 @@ class Solution4:
             else:
                 d[x] = 1
             
-            #while d.peekitem()[0] - d.peekitem(0)[0] > limit:
+            # Happens to work with "if", but...
+            while d.peekitem()[0] - d.peekitem(0)[0] > limit:
+                if d[arr[l]] == 1:
+                    #d.pop(arr[l]) # O(log n)
+                    del d[arr[l]] # faster since O(1)
+                else:
+                    d[arr[l]] -= 1
+
+                l += 1
+            
+            if r - l > res:
+                res = r - l
+
+        return res + 1
+
+"""
+Solution 4b: same, but instead of forcing sliding window to satisfy problem
+condition, let it grow monotonically...
+
+"""
+import sortedcontainers
+class Solution4b:
+    def longestSubarray(self, arr: List[int], limit: int) -> int:
+        d = sortedcontainers.SortedDict()
+        l = 0 # left index of sliding window
+
+        for x in arr:
+            #d[x] = d.get(x, 0) + 1
+            if x in d:
+                d[x] += 1
+            else:
+                d[x] = 1
+            
             if d.peekitem()[0] - d.peekitem(0)[0] > limit:
                 if d[arr[l]] == 1:
                     #d.pop(arr[l]) # O(log n)
@@ -579,11 +525,8 @@ class Solution4:
 
                 l += 1
             
-            elif r - l > res:
-                res = r - l
-
-        return res + 1
-        #return len(arr) - l # ??? don't know why this works
+        return len(arr) - l
+        #return sum(d.values())
 
 ###############################################################################
 """
@@ -634,6 +577,144 @@ class Solution5:
         return res + 1
 
 ###############################################################################
+"""
+Solution 6: brute force w/ early break/return if n - i < res.
+
+TLE's w/o early break.
+
+O() time ???
+O(1) extra space
+
+Runtime: 612 ms, faster than 40.00% of Python3 online submissions
+Memory Usage: 23.9 MB, less than 100.00% of Python3 online submissions
+"""
+class Solution6:
+    def longestSubarray(self, arr: List[int], limit: int) -> int:
+        n = len(arr)
+        res = 1 # max length
+
+        for i in range(n):
+            if n - i < res:
+                break
+
+            mn = mx = arr[i]
+
+            for j in range(i+1, n):
+                x = arr[j]
+                if x < mx - limit or x > mn + limit:
+                    break
+
+                mn = min(mn, x)
+                mx = max(mx, x)
+                res = max(res, j - i + 1)
+
+        return res
+
+"""
+Solution 6b: same, but using for-else.
+
+Runtime: 512 ms, faster than 81.70% of Python3 online submissions
+Memory Usage: 23.9 MB, less than 100.00% of Python3 online submissions
+"""
+class Solution6b:
+    def longestSubarray(self, arr: List[int], limit: int) -> int:
+        n = len(arr)
+        res = 1 # max length
+
+        for i in range(n):
+            if n - i < res:
+                break
+
+            mn = mx = arr[i]
+
+            for j in range(i+1, n):
+                x = arr[j]
+                if x < mx - limit or x > mn + limit:
+                    res = max(res, j - i)
+                    break
+
+                mn = min(mn, x)
+                mx = max(mx, x)
+            else:
+                res = max(res, n - i)
+
+        return res
+
+"""
+Solution 6c: same, but optimized a bit (no for-else).
+
+Runtime: 404 ms, faster than 80.00% of Python3 online submissions
+Memory Usage: 24 MB, less than 100.00% of Python3 online submissions
+"""
+class Solution6c:
+    def longestSubarray(self, arr: List[int], limit: int) -> int:
+        n = len(arr)
+        res = 0
+
+        for i in range(n):
+            if n - i < res:
+                break
+
+            mx = mn = arr[i]
+            mx_limit = mx - limit
+            mn_limit = mn + limit
+            
+            for j in range(i+1, n):
+                x = arr[j]
+                if x < mx_limit or x > mn_limit:
+                    break
+
+                if x < mn:
+                    mn = x
+                    mn_limit = mn + limit
+                if x > mx:
+                    mx = x
+                    mx_limit = mx - limit
+                if j - i > res:
+                    res = j - i
+
+        return res + 1
+
+"""
+Solution 6d: same, but optimized a bit and using for-else.
+
+Runtime: 372 ms, faster than 97.37% of Python3 online submissions
+Memory Usage: 23.9 MB, less than 100.00% of Python3 online submissions
+"""
+class Solution6d:
+    def longestSubarray(self, arr: List[int], limit: int) -> int:
+        n = len(arr)
+        res = 1
+
+        for i in range(n):
+            if n - i < res:
+                break
+
+            mx = mn = arr[i]
+            mx_limit = mx - limit
+            mn_limit = mn + limit
+            
+            for j in range(i+1, n):
+                x = arr[j]
+                if x < mx_limit or x > mn_limit:
+                    if j - i > res:
+                        res = j - i
+                    break
+
+                if x < mn:
+                    mn = x
+                    mn_limit = mn + limit
+                if x > mx:
+                    mx = x
+                    mx_limit = mx - limit
+            
+            else:
+                if n - i > res:
+                    res = n - i
+
+        return res
+
+###############################################################################
 
 if __name__ == "__main__":
     def test(arr, limit, comment=None):
@@ -655,16 +736,22 @@ if __name__ == "__main__":
 
 
     sol = Solution() # use sliding window with inc queue for min and dec queue for max
-    sol = Solution1b() # same, but store values instead of indices
+    sol = Solution1b() # same, but let swindow grow monotonically
 
-    #sol = Solution2() # brute force
-    #sol = Solution2b() # same, but using for-else
-    #sol = Solution2d() # optimized a bit
-    #sol = Solution2d() # optimized a bit, using for-else
+    sol = Solution2() # same as sol 1, but store values instead of indices
+    sol = Solution2b() # same, but let swindow grow monotonically
 
     #sol = Solution3() # sliding window with sorted list and binary insert/remove.
-    #sol = Solution4() # two sortedcontainer's SortedDict
+    sol = Solution3b() # same, but let swindow grow monotonically
+    #sol = Solution4() # use sortedcontainer's SortedDict instead of sorted list
+    sol = Solution4b() # same, but let swindow grow monotonically
+    
     #sol = Solution5() # two heaps
+
+    #sol = Solution6() # brute force
+    #sol = Solution6b() # same, but using for-else
+    #sol = Solution6c() # optimized a bit
+    #sol = Solution6d() # optimized a bit, using for-else
 
     comment = "LC ex1; answer = 2"
     arr = [8,2,4,7]
