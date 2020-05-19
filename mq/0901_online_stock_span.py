@@ -44,7 +44,7 @@ O(1) time amortized, O(n) worst case
 O(n) extra space - for stack
 
 Each price is pushed to the stack once, and popped at most once.  If we have
-seen n prices so far, then there have been 2n total pushes and pops.
+seen n prices so far, then there have been at most 2n total push/pop operations.
 """
 class StockSpanner:
     def __init__(self):
@@ -60,6 +60,26 @@ class StockSpanner:
         self.stack.append((price, total_pops))
 
         return total_pops 
+
+"""
+LC example:
+100 80 60 70 60 75 85
+
+        after
+        stack                           pop     return
+100     (100,1)                                 1
+80      (100,1),(80,1)                          1
+60      (100,1),(80,1),(60,1)                   1
+70      (100,1),(80,1),(70,2)           60      1 +1 = 2
+60      (100,1),(80,1),(70,2),(60,1)            1
+75      (100,1),(80,1),(75,4)           60,70   1 +1+2 = 4
+85      (100,1),(85,6)                  75,80   1 +4+1 = 6
+
+
+100 80 60 70 60 75 85
+  1  1  1  2  1  4  6
+
+"""
 
 ###############################################################################
 """
@@ -93,9 +113,26 @@ class StockSpanner2:
             val = self.i - self.stack[-1]
 
         self.stack.append(self.i)
-        self.i += 1
+        self.i += 1 # index to use for next function call of next()
         
         return val 
+
+"""
+LC example:
+  0  1  2  3  4  5  6   index
+100 80 60 70 60 75 85
+
+        after           after
+        values ~ stack  stack       return i - stack[-1]
+100     100             0           1*
+80      100,80          0,1         1 - 0 = 1  
+60      100,80,60       0,1,2       2 - 1 = 1 
+70      100,80,70       0,1,3       3 - 1 = 2 
+60      100,80,70,60    0,1,3,4     4 - 3 = 1    
+75      100,80,75       0,1,5       5 - 1 = 4
+85      100,85          0,6         6 - 0 = 6
+
+"""
 
 ###############################################################################
 """
@@ -117,7 +154,7 @@ class StockSpanner3:
             val = self.i - self.stack[-1][1]
 
         self.stack.append((price, self.i))
-        self.i += 1
+        self.i += 1 # index to use for next function call of next()
         
         return val 
     
@@ -125,22 +162,23 @@ class StockSpanner3:
 
 if __name__ == "__main__":
     def test(arr, comment=None):
-        s = StockSpanner()
-        #s = StockSpanner2()
-        #s = StockSpanner3()
+        print("="*80)
+        if comment:
+            print(comment)
+
+        print(f"\n{arr}")
 
         res = []
 
         for price in arr:
-            res += [s.next(price)]
+            res += [sol.next(price)]
+        
+        print(f"\nresult = {res}\n")
 
-        print("="*80)
-        if comment:
-            print(comment)
-            
-        print(f"\n{arr}")
-        print(f"\nresult = {res}")
 
+    sol = StockSpanner()
+    #sol = StockSpanner2()
+    #sol = StockSpanner3()
 
     comment = "LC ex1; answer = [1, 1, 1, 2, 1, 4, 6]"    
     arr = [100, 80, 60, 70, 60, 75, 85]
