@@ -55,6 +55,17 @@ dp[r][c] = number of submatrices with all 1's that end at cell (r,c).
 = 0 if mat[r][c] == 0
 = 1 + min(dp[r-1][c], dp[r][c-1], dp[r-1][c-1]) if mat[r][c] == 1
 
+Example from LC post:
+
+given matrix:   dp matrix:
+1 1 0 0 0       1 1 0 0 0 
+1 1 1 1 1       1 2 1 1 1
+0 1 1 1 1       0 1 2 2 2
+0 1 1 1 1       0 1 2 3 3
+0 0 1 0 1       0 0 1 0 1
+
+https://leetcode.com/problems/count-square-submatrices-with-all-ones/discuss/643429/Python-DP-Solution-%2B-Thinking-Process-Diagrams-(O(mn)-runtime-O(1)-space)
+
 O(mn) time
 
 O(1) extra space: if modify input
@@ -77,7 +88,7 @@ class Solution:
                 else:
                     mat[r][c] += min(mat[r-1][c], mat[r][c-1], mat[r-1][c-1])
                     res += mat[r][c]
-        
+
         return res
 
 """
@@ -311,4 +322,14 @@ if __name__ == "__main__":
         [1,0,1],
         [1,1,0],
         [1,1,0]]
+    test(mat, comment)
+
+    # https://leetcode.com/problems/count-square-submatrices-with-all-ones/discuss/643429/Python-DP-Solution-%2B-Thinking-Process-Diagrams-(O(mn)-runtime-O(1)-space)
+    comment = "LC post; answer = 26"
+    mat = [
+        [1,1,0,0,0],
+        [1,1,1,1,1],
+        [0,1,1,1,1],
+        [0,1,1,1,1],
+        [0,0,1,0,1]]
     test(mat, comment)
