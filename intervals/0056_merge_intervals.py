@@ -78,6 +78,34 @@ class Solution1b:
 
         return res
         
+"""
+Solution 1c: same, but doesn't make full use of the fact that the left
+endpoints are sorted.
+"""
+class Solution1c:
+    def merge(self, intervals: List[List[int]]) -> List[List[int]]:
+        if not intervals:
+            return []
+        
+        n = len(intervals)
+        intervals.sort() # intervals.sort(key=lambda x: x[0])
+        
+        res = [intervals[0]]
+        
+        for i in range(n):
+            a1, a2 = res[-1]
+            b1, b2 = intervals[i]
+            
+            if a2 < b1 or b2 < a1: # don't overlap
+                res.append(intervals[i])
+            else:
+                lo = min(a1, b1) # always a1 since intervals sorted
+                hi = max(a2, b2)
+            
+                res[-1] = [lo, hi]
+                
+        return res
+                
 ###############################################################################
 """
 Solution 2: use sorting. In-place version, modifies "intervals", using it
@@ -205,11 +233,12 @@ if __name__ == "__main__":
 
     s = Solution()   # sorting
     s = Solution1b() # rewrite
+    s = Solution1c() # same, but doesn't make full use of fact that the left endpoints are sorted
     
     #s = Solution2()  # sorting; in-place, merging intervals within input
     #s = Solution2b() # rewrite
     
-    s = Solution3() # brute force
+    #s = Solution3() # brute force
 
     comment = "LC ex1; answer = [[1,6],[8,10],[15,18]]"
     arr = [[1,3],[2,6],[8,10],[15,18]]
