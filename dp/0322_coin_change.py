@@ -25,6 +25,9 @@ import collections
 This is an unbounded knapsack problem.
 The standard way to solve it is using memoized recursion or DP tabulation.
 However, there are branch & bound solutions that are much faster.
+
+Note that using a pure greedy method (choose as many of the larger coins
+as possible) does not work for arbitrary coin denominations.
 """
 
 ###############################################################################
