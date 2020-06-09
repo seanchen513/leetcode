@@ -272,11 +272,14 @@ class Solution6:
 
             coin = coins[i]
 
-            # LHS = lower bound on number of coins, achieved using the current coin
-            # Return early since we can't possibly achieve original "amount"
-            # along this path.
-            # This is key to why this solution is so fast.
-            if n_coins + (amt + coin - 1) / coin > min_coins:
+            """
+            LHS = lower bound on number of coins, achieved using the current coin
+            Return early since we can't possibly achieve original "amount"
+            along this path.
+            This is key to why this solution is so fast.
+            """
+            #if n_coins + (amt + coin - 1) / coin > min_coins:
+            if (min_coins - n_coins - 1) * coin + 1 < amt:
                 return
             
             if amt % coin == 0: # original "amount" achieved
@@ -319,11 +322,14 @@ other branch & bound solutions here.
 Based on: ("improved DFS")
 https://leetcode.com/problems/coin-change/discuss/114993/Four-kinds-of-solutions%3A-DP-BFS-DFS-improved-DFS
 
-But also includes the extra, optional check
+But uses the tighter check (found in other B&B solution6):
 "if n_coins + (amt + coin - 1) / coin > min_coins".
 
-Runtime: 52 ms, faster than 99.86% of Python3 online submissions
-Memory Usage: 13.8 MB, less than 95.33% of Python3 online submissions
+This condition is equivalent to:
+"if (min_coins - n_coins - 1) * coin + 1 > amt"
+
+Runtime: 40 ms, faster than 99.99% of Python3 online submissions
+Memory Usage: 14 MB, less than 64.76% of Python3 online submissions
 """
 class Solution7:
     def coinChange(self, coins, amount):
@@ -332,14 +338,15 @@ class Solution7:
 
             coin = coins[start]
 
-            # LHS = lower bound on number of coins, achieved using the current coin
-            # Return early since we can't possibly achieve original "amount"
-            # along this path.
-            # For this particular solution, this check isn't necessarily,
-            # since there is another check within the loop below. However, it
-            # speeds up the solution. Better to have this check before the
-            # "amt == 0" check below.
-            if n_coins + (amt + coin - 1) / coin > min_coins:
+            """
+            LHS = lower bound on number of coins, achieved using the current coin
+            Return early since we can't possibly achieve original "amount"
+            along this path.
+            For this particular solution, this check isn't necessary,
+            since there is another check within the loop below. 
+            """
+            #if n_coins + (amt + coin - 1) / coin > min_coins:
+            if (min_coins - n_coins - 1) * coin + 1 < amt:
                 return
 
             div = amt // coin
@@ -364,7 +371,10 @@ class Solution7:
                     amt += coin 
                     n_coins -= 1
                     
-                    if (min_coins - n_coins) * next_coin > amt: # hope still exists
+                    ### This check isn't necessarily, as long as we have the 
+                    ### check at the start above, but it helps.
+                    #if (min_coins - n_coins) * next_coin > amt: # hope still exists
+                    if (min_coins - n_coins - 1) * next_coin + 1 > amt: # better
                         dfs(start + 1, amt, n_coins)
                     else:
                         break
