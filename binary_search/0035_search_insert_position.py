@@ -28,10 +28,35 @@ Output: 0
 """
 
 from typing import List
+import bisect
 
 ###############################################################################
 """
-Solution: use binary search with "lo < hi". Check "lo" (or "hi") after loop.
+Solution: use binary search (left version) with "lo < hi".
+
+Similar to bisect.bisect(), aka, bisect.bisect_left().
+"""
+class Solution:
+    def searchInsert(self, arr: List[int], target: int) -> int:
+        lo = 0
+        hi = len(arr)
+        
+        while lo < hi:
+            mid = lo + (hi - lo) // 2
+            
+            if arr[mid] < target:
+                lo = mid + 1
+            else:
+                hi = mid
+                
+        return lo
+
+###############################################################################
+"""
+Solution: use binary search (right version) with "lo < hi".
+Check "lo" (or "hi") after loop.
+
+Similar to bisect.bisect_right().
 """
 class Solution:
     def searchInsert(self, arr: List[int], target: int) -> int:
@@ -71,3 +96,25 @@ class Solution:
                 return mid
                 
         return lo
+
+###############################################################################
+"""
+Solution: use bisect_left().
+"""
+class Solution:
+    def searchInsert(self, nums: List[int], target: int) -> int:
+        return bisect.bisect_left(nums, target)
+            
+"""
+Solution: use bisect(), aka, bisect_right().
+"""
+class Solution:
+    def searchInsert(self, nums: List[int], target: int) -> int:
+        i = bisect.bisect(nums, target)
+        
+        if i > 0 and nums[i-1] == target:
+            return i-1
+        
+        return i
+            
+                
