@@ -35,6 +35,88 @@ import math
 
 ###############################################################################
 """
+Given:
+n = 4
+k = 9
+n! = 4! = 24
+We want to find the 9th permutation out of 24.
+
+1234
+1243
+1324
+1342
+1423
+1432
+
+2134
+2143
+2314 -- This is the answer.
+
+Notice how the first 6 perms have "1" for the first digit.
+The next group of 6 perms have "2" for the first digit, etc.
+
+Within the first group of 6 perms, the perms are grouped by their 2nd digit,
+and there are 3 choices for the 2nd digit (2, 3, or 4).
+Each of these subgroups have size 2. A similar pattern holds in the other
+groups of 6 perms, but with different choices for the 2nd digit.
+
+Within each group of size 2 (share 1st digit and 2nd digit), the perms
+are grouped by their 3rd digit, and there are 2 choices for the 3rd digit. 
+Each of these subgroups have size 1.
+
+This motivates the factorial number system...
+
+### Algo:
+
+Input k is a 1-based position, but we want to work with 0-based indices,
+so adjust k down by 1.
+
+# Round 1: n = 4, k = 8 (adjusted)
+# res = [], digits = [1,2,3,4]
+
+Initialize ordered digits = [1,2,3,4].
+
+Compute which group the kth perm is in, ie, what the first digit should be.
+These groups have size (n-1)! = 3! = 6.
+
+idx = k // (n-1)!
+= 8 // 6 = 1 (in a 0-based index system)
+
+So the 8th perm is in group 1 (0-based).
+The first digit is digits[idx] = digits[1] = 2.
+
+We remove "2" from the digits list, so now digits = [1,3,4].
+We skipped over idx * (n-1)! number of perms, so now we've reduced the
+problem to finding the remaining digits of the kth permutation.
+
+new n = n - 1 = 4 - 1 = 3
+new k = k - idx * (n-1)! = 8 - 1 * 3! = 2
+
+# Round 2: n = 3, k = 2
+# res = [2], digits = [1,3,4]
+
+Compute which group the kth perm is in, ie, what the second digit should be.
+These groups have size (n-1)! = 2! = 2.
+
+idx = k // (n-1)!
+= 2 // 2 = 1 (in a 0-based index system)
+
+So the kth perm is in the group 1 (0-based).
+The first digit is digits[idx] = digits[1] = 3.
+We remove "3" from the digits list, so now digits = [1,4].
+
+new n = n - 1 = 3 - 1 = 2
+new k = k - idx * (n-1)! = 2 - 1 * 2! = 0
+
+# Round 3: n = 2, k = 0
+# res = [2,3], digits = [1,4]
+
+...
+
+"""
+
+###############################################################################
+"""
 Solution: iteration.
 
 O(n^2) time: for deleting elements from the "digits" array each iteration.
@@ -95,38 +177,6 @@ class Solution1b:
 ###############################################################################
 """
 Solution 2: recursion
-
-n = 4
-k = 9
-n! = 4! = 24
-
-3! < 9 < 4!
-
-9 - 3! = 3
-
-1234
-1243
-1324
-1342
-1423
-1432
-
-2134
-2143
-2314
-
-2
-n = 3
-k = 3
-idx = k // (n-1)! = 3 // 2! = 3 // 2 = 1
-digits = [1,3,4]
-d = 3
-
-23
-n = 2
-k = 1
-idx = 1 // 1! = 1
-digits = [1,4]
 
 Runtime: 20 ms, faster than 98.66% of Python3 online submissions
 Memory Usage: 13.8 MB, less than 8.33% of Python3 online submissions
