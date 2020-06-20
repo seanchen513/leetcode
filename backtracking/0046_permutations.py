@@ -19,6 +19,7 @@ Output:
 """
 
 from typing import List
+import collections
 import itertools
 
 ###############################################################################
@@ -56,7 +57,7 @@ class Solution:
         return res
 
 """
-Solution 1b: same, but returning list of permutations back.
+Solution 1b: same, but backtrack fn returns list of permutations.
 
 Seems to be a lot of unnecessary joining of lists (empty list + full list)
 at all levels of recursion except the lowest one.
@@ -82,29 +83,97 @@ class Solution1b:
         return rec(0)
 
 ###############################################################################
-"""
-Solution 2: recursion, passing set of elements not used yet.
+""" 
+Solution 2: recursion, passing permutation being built and counter.
+
+This generalizes in case the input array contains duplicates.
 """
 class Solution2:
     def permute(self, arr: List[int]) -> List[List[int]]:
-        def rec(unused_elts, perm=[]):			
-            if not unused_elts:
-                res.append(perm)
+        def rec(perm, freq):			
+            if len(perm) == n:
+                res.append(perm[:]) # important to make a copy
+                return
+
+            for x in freq:
+                if freq[x] > 0:
+                    perm.append(x)
+                    freq[x] -= 1
+
+                    rec(perm, freq)
+
+                    perm.pop()
+                    freq[x] += 1
+
+        n = len(arr)
+        res = []
+
+        rec([], collections.Counter(arr))
+
+        return res
+
+""" 
+NOT A SOLUTION--just for illustration
+
+Recursion, passing permutation being built and set of unused elements so far.
+
+The problem seems to be that adding and removing elements from the set
+disrupts the order of elements in the set, so that looping through the set
+doesn't work as expected.
+
+"""
+class Solution2_NOT:
+    def permute(self, arr: List[int]) -> List[List[int]]:
+        def rec(perm, unused_elts):			
+            if not unused_elts: 
+            # if len(perm) == n:
+                res.append(perm[:]) # important to make a copy
                 return
 
             for x in unused_elts:
-                rec(unused_elts - set([x]), perm + [x])
+                perm.append(x)
+                unused_elts.remove(x)
 
+                rec(perm, unused_elts)
+
+                perm.pop()
+                unused_elts.add(x)
+
+        #n = len(arr)
         res = []
 
-        rec(set(arr))
+        rec([], set(arr))
 
         return res
 
 """
-Solution 2b: index version of sol 2
+Solution 2b: same, but the backtrack modifications are within the
+arguments to the recursive function call.
+
+Since we pass a modified copy of the permutation when calling the recursive 
+backtrack function, we don't have to make a copy of each final permutation.
+
 """
 class Solution2b:
+    def permute(self, arr: List[int]) -> List[List[int]]:
+        def rec(perm, unused_elts):
+            if not unused_elts:
+                res.append(perm) # don't need to make copy of perm
+                return
+
+            for x in unused_elts:
+                rec(perm + [x], unused_elts - set([x]))
+
+        res = []
+
+        rec([], set(arr))
+
+        return res
+
+"""
+Solution 2c: index version of sol 2b
+"""
+class Solution2c:
     def permute(self, arr: List[int]) -> List[List[int]]:
         def rec(indices, perm=[]):			
             if not indices: # unused indices
@@ -302,8 +371,9 @@ if __name__ == "__main__":
     sol = Solution() # recursion, passing first index to swap succeeding elts with
     #sol = Solution1b() # same, but return list of permutations from backtrack fn
 
-    #sol = Solution2() # recursion, passing set of elements not used yet
-    #sol = Solution2b() # index version
+    #sol = Solution2() # recursion, passing permutation being built and counter.
+    #sol = Solution2b() # recursion, passing set of elements not used yet
+    #sol = Solution2c() # index version
     
     """
     For kth iteration, start with all permutations of length k.
