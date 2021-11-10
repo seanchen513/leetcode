@@ -34,8 +34,7 @@ Follow-up: Can you come up with an algorithm that is less than O(n2) time comple
 """
 
 from typing import List
-import string
-import collections
+#import collections
 
 """
 This problem is a slightly harder variation since it asks to return the indices.
@@ -86,6 +85,7 @@ O(n) extra space: to build sorted array
 class Solution2:
     def twoSum(self, nums: List[int], target: int) -> List[int]:
         # build sorted array of tuples (value, index in nums)
+        # functional equivalent: a = sorted(zip(nums, range(len(nums))))
         a = []
         for i, x in enumerate(nums):
             a.append((x, i))
@@ -94,7 +94,7 @@ class Solution2:
 
         # two pointers method
         i = 0
-        j = len(nums) - 1
+        j = len(a) - 1
 
         while i < j:
             curr = a[i][0] + a[j][0] # current sum
@@ -105,6 +105,27 @@ class Solution2:
                 j -= 1
             else:
                 return [a[i][1], a[j][1]]
+
+"""
+Solution 2b: same, but don't reverse order of elements in enumerate() tuples
+"""
+class Solution2b:
+    def twoSum(self, nums: List[int], target: int) -> List[int]:
+        # sort by values of nums (2nd component of enumerate(nums))
+        a = sorted(enumerate(nums), key=lambda x: x[1]) 
+
+        i = 0
+        j = len(a) - 1
+
+        while i < j:
+            curr = a[i][1] + a[j][1] # current sum
+
+            if curr < target:
+                i += 1
+            elif curr > target:
+                j -= 1
+            else:
+                return [a[i][0], a[j][0]]
 
 ###############################################################################
 """
@@ -158,6 +179,7 @@ if __name__ == "__main__":
     #sol = Solution1b() # brute force, slightly optimized
     
     #sol = Solution2() # sorting, 2 pointers
+    sol = Solution2b() # same, but don't reverse order of elts in enumerate() tuples
 
     #sol = Solution3() # dict
     #sol = Solution3b() # dict, enumerate()
